@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marketim Login</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .error-message {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: none;
+      }
+      .input-error {
+        border-color: #dc2626 !important;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-tr from-blue-400 via-purple-500 to-pink-500 h-screen flex items-center justify-center"
+  >
+    <div class="bg-white rounded-lg shadow-md p-10 w-full max-w-md">
+      <h1 class="text-3xl font-bold text-center mb-2">Marketim</h1>
+      <h2 class="text-lg font-semibold text-center mb-6">Login</h2>
+      <form id="loginForm" novalidate>
+        <label for="email" class="block mb-2 text-sm">E-Mail Adresse</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="w-full px-4 py-2 border border-gray-300 rounded-md mb-1"
+          placeholder="beispiel@domain.com"
+        />
+        <p id="emailError" class="error-message">
+          Bitte geben Sie eine gültige E-Mail-Adresse ein.
+        </p>
+
+        <label for="password" class="block mb-2 text-sm">Passwort</label>
+        <div class="relative mb-1">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md"
+            placeholder="Mindestens 8 Zeichen"
+          />
+          <button
+            type="button"
+            id="togglePassword"
+            class="absolute inset-y-0 right-3 text-gray-500"
+          >
+            👁️
+          </button>
+        </div>
+        <p id="passwordError" class="error-message">
+          Passwort muss mindestens 8 Zeichen lang sein und ein Großbuchstabe,
+          ein Kleinbuchstabe, eine Zahl und ein Sonderzeichen enthalten.
+        </p>
+
+        <div class="text-right mb-4">
+          <a href="#" class="text-sm text-blue-500 hover:underline"
+            >Passwort vergessen?</a
+          >
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-md"
+        >
+          Login
+        </button>
+
+        <p id="formMessage" class="text-center mt-4 text-sm"></p>
+      </form>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        // Function to decode JWT token
+        function decodeJwt(token) {
+          try {
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+              atob(base64)
+                .split("")
+                .map(function (c) {
+                  return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                })
+                .join("")
+            );
+            return JSON.parse(jsonPayload);
+          } catch (error) {
+            console.error("Error decoding token:", error);
+            return null;
+          }
+        }
+
+        // Check if authToken exists and is valid
+        const authToken = localStorage.getItem("authToken");
+        if (authToken) {
+          const decodedToken = decodeJwt(authToken);
+          if (decodedToken) {
+            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+            if (decodedToken.exp > currentTime) {
+              // Token is valid, redirect to /profile immediately
+              window.location.href = "/profile";
+              return; // Stop further execution
+            } else {
+              // Token is expired, remove it
+              localStorage.removeItem("authToken");
+            }
+          } else {
+            // Invalid token, remove it
+            localStorage.removeItem("authToken");
+          }
+        }
+
+        // If no valid token, proceed with login form functionality
+
+        // Toggle Password Visibility
+        $("#togglePassword").on("click", function () {
+          const passwordField = $("#password");
+          const type =
+            passwordField.attr("type") === "password" ? "text" : "password";
+          passwordField.attr("type", type);
+          $(this).text(type === "password" ? "👁️" : "👁️‍🗨️");
+        });
+
+        // Form Submission and Validation
+        $("#loginForm").on("submit", function (e) {
+          e.preventDefault(); // Prevent default form submission
+
+          // Reset previous error states
+          $(".error-message").hide();
+          $("input").removeClass("input-error");
+          $("#formMessage").text("").removeClass("text-green-600 text-red-600");
+
+          // Get form values
+          const email = $("#email").val().trim();
+          const password = $("#password").val();
+
+          let isValid = true;
+
+          // Validate Email
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!email || !emailRegex.test(email)) {
+            $("#emailError").show();
+            $("#email").addClass("input-error");
+            isValid = false;
+          }
+
+          // Validate Password
+          const passwordRegex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+          if (!password || !passwordRegex.test(password)) {
+            $("#passwordError").show();
+            $("#password").addClass("input-error");
+            isValid = false;
+          }
+
+          // If all validations pass, submit the form to the API
+          if (isValid) {
+            const formData = {
+              email: email,
+              password: password,
+            };
+
+            $.ajax({
+              url: "https://api.marketim.app/app/login",
+              type: "POST",
+              contentType: "application/json",
+              data: JSON.stringify(formData),
+              success: function (response) {
+                // Save the token to local storage
+                if (response.token) {
+                  // Decode token to check expiration
+                  const decodedToken = decodeJwt(response.token);
+                  if (!decodedToken) {
+                    $("#formMessage")
+                      .text("Ungültiges Token erhalten.")
+                      .addClass("text-red-600");
+                    return;
+                  }
+
+                  const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+                  if (decodedToken.exp < currentTime) {
+                    $("#formMessage")
+                      .text("Das erhaltene Token ist abgelaufen.")
+                      .addClass("text-red-600");
+                    return;
+                  }
+
+                  // Token is valid, save to local storage
+                  localStorage.setItem("authToken", response.token);
+                } else {
+                  $("#formMessage")
+                    .text("Login erfolgreich, aber kein Token erhalten.")
+                    .addClass("text-yellow-600");
+                  return;
+                }
+
+                // Display success message
+                $("#formMessage")
+                  .text("Login erfolgreich! Sie werden weitergeleitet...")
+                  .addClass("text-green-600");
+
+                // Redirect to /profile after a delay
+                setTimeout(() => {
+                  window.location.href = "/profile";
+                }, 2000);
+              },
+              error: function (xhr) {
+                let errorMessage =
+                  "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.";
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                  errorMessage = xhr.responseJSON.message;
+                }
+                $("#formMessage").text(errorMessage).addClass("text-red-600");
+              },
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

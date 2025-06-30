@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Template Products</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../public/style/import-products.css" />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  </head>
+  <body class="min-h-screen flex flex-col items-center p-6">
+    <div class="topbar-container">
+      <h2 class="topbar-title">Select Products for Your Template</h2>
+      <div class="topbar-controls">
+        <div class="control-group">
+          <label for="templateSelect" class="control-label"
+            >Select Template:</label
+          >
+          <select
+            id="templateSelect"
+            class="control-select"
+            onchange="updateGridLayoutOptions()"
+          >
+            <option value="1">1 Product</option>
+            <option value="2">2 Products</option>
+            <option value="4">4 Products</option>
+            <option value="9">9 Products</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="gridLayoutSelect" class="control-label"
+            >Grid Layout:</label
+          >
+          <select
+            id="gridLayoutSelect"
+            class="control-select"
+            onchange="updateGridLayout()"
+          >
+            <!-- Options will be populated dynamically -->
+          </select>
+        </div>
+        <div class="color-picker-container">
+          <label for="backgroundColorPicker" class="color-picker-label"
+            >Background Color:</label
+          >
+          <input
+            type="color"
+            id="backgroundColorPicker"
+            value="#e0f7fa"
+            onchange="updateBackgroundColor()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div id="templateGridContainer">
+      <div id="templateGrid"></div>
+    </div>
+
+    <button onclick="exportPDFWithDOMToImage()" class="download-btn">
+      Download PDF
+    </button>
+
+    <div
+      id="productModal"
+      class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-lg max-w-lg w-full p-6 relative">
+        <button
+          onclick="closeProductList()"
+          class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"
+        >
+          ×
+        </button>
+        <h3 class="text-xl font-semibold mb-4">Select a Product</h3>
+        <ul id="productList" class="space-y-3 max-h-80 overflow-y-auto"></ul>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+
+    <script>
+      const products = [
+        {
+          id: 1,
+          nameTr: "Yedoy Kaşar Peyniri",
+          nameDe: "Kashkaval Schnittkäse",
+          oldPrice: 2.99,
+          newPrice: 1.99,
+          unitPrice: "1kg = 4.98",
+          saving: "1,-",
+          packageSize: "400 g Packung",
+          image: "./public/images/dummy3.jpg",
+          logo: "./public/images/dummy2.jpg",
+        },
+        {
+          id: 2,
+          nameTr: "Zeytin Ezmesi",
+          nameDe: "Olivenpaste",
+          oldPrice: 3.49,
+          newPrice: 2.49,
+          unitPrice: "1kg = 9.96",
+          saving: "1,-",
+          packageSize: "250 g Packung",
+          image: "./public/images/dummy3.jpg",
+          logo: "./public/images/dummy2.jpg",
+        },
+      ];
+
+      const selectedProducts = {};
+      let currentBox = null;
+      const editingState = {};
+
+      const gridLayouts = {
+        1: [[1]],
+        2: [[1, 1], [2]],
+        4: [[1, 3], [2, 2], [3, 1], [4]],
+        9: [
+          [3, 3, 3],
+          [2, 3, 4],
+          [4, 3, 2],
+          [1, 4, 4],
+        ],
+      };
+
+      // Function to update template selection based on query parameter
+      function setTemplateFromQueryParam() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const templateParam = urlParams.get("template");
+
+        const templateSelect = document.getElementById("templateSelect");
+        const validTemplates = ["1", "2", "4", "9"]; // Allowed template values
+
+        if (templateParam && validTemplates.includes(templateParam)) {
+          templateSelect.value = templateParam; // Set to the valid template value
+          // Update the grid layout options
+        }
+        updateGridLayoutOptions();
+      }
+
+      function updateGridLayoutOptions() {
+        const templateSize = parseInt(
+          document.getElementById("templateSelect").value
+        );
+        const gridLayoutSelect = document.getElementById("gridLayoutSelect");
+        gridLayoutSelect.innerHTML = "";
+
+        const layouts = gridLayouts[templateSize] || [[templateSize]];
+        layouts.forEach((layout, index) => {
+          const option = document.createElement("option");
+          option.value = layout.join(",");
+          option.textContent = layout.join(":");
+          gridLayoutSelect.appendChild(option);
+        });
+
+        updateGridLayout();
+      }
+
+      function updateBackgroundColor() {
+        const backgroundColorPicker = document.getElementById(
+          "backgroundColorPicker"
+        );
+        const templateGrid = document.getElementById("templateGrid");
+        const templateGridContainer = document.getElementById(
+          "templateGridContainer"
+        );
+        const selectedColor = backgroundColorPicker.value;
+        templateGrid.style.setProperty("--bg-color", selectedColor);
+        templateGridContainer.style.setProperty("--bg-color", selectedColor);
+      }
+
+      // Function to fetch user profile and update header
+      function updateGridLayout() {
+        const templateSize = parseInt(
+          document.getElementById("templateSelect").value
+        );
+        const gridLayoutSelect = document.getElementById("gridLayoutSelect");
+        const selectedLayout = gridLayoutSelect.value
+          ? gridLayoutSelect.value.split(",").map(Number)
+          : gridLayouts[templateSize][0];
+
+        const totalProducts = selectedLayout.reduce((sum, num) => sum + num, 0);
+        if (totalProducts !== templateSize) {
+          console.error(
+            "Invalid grid layout: total products do not match template size"
+          );
+          return;
+        }
+
+        const templateGrid = document.getElementById("templateGrid");
+        templateGrid.innerHTML = ""; // Clear existing content
+
+        // Fetch user profile and update header
+        fetchUserProfile(function (companyLogo, coverImage) {
+          const headerItem = document.createElement("div");
+          headerItem.className = "grid-item";
+          headerItem.innerHTML = `
+      <div class="header-wrapper">
+        <header class="bg-white w-full rounded-lg shadow-md relative h-60 overflow-hidden"
+          style="background-image: url('${coverImage}'); background-size: cover; background-position: center;">
+          <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+          <div class="relative z-10 flex items-center justify-between h-full p-4">
+            <div class="flex-shrink-0">
+              <img src="${companyLogo}" alt="Logo" class="h-20 w-20 rounded-full object-cover" />
+            </div>
+            <div class="flex-shrink-0 text-right">
+              <p class="text-sm font-medium text-white" id="currentDate">
+                ${new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+          </div>
+        </header>
+      </div>
+    `;
+          templateGrid.appendChild(headerItem);
+
+          // Render product boxes
+          let currentBoxNumber = 1;
+          selectedLayout.forEach((colsInRow) => {
+            if (colsInRow === 0) return;
+            const row = document.createElement("div");
+            row.className = `grid gap-4 w-full grid-cols-${colsInRow}`;
+
+            for (let i = 0; i < colsInRow; i++) {
+              const boxNumber = currentBoxNumber;
+              const box = document.createElement("div");
+              box.className = "product-box-wrapper";
+              box.setAttribute("data-box", boxNumber);
+              box.setAttribute("draggable", "true");
+
+              if (selectedProducts[boxNumber]) {
+                const p = selectedProducts[boxNumber];
+                const isEditing = editingState[boxNumber] || false;
+
+                if (isEditing) {
+                  box.innerHTML = `
+              <div class="label-container">
+                <img src="${p.logo}" alt="Produkt Logo" class="product-logo" />
+                <div class="product-names">
+                  <input type="text" class="editable-input german-name" value="${p.nameDe}" />
+                  <input type="text" class="editable-input turkish-name" value="${p.nameTr}" />
+                </div>
+                <img src="./public/images/halal.png" alt="HALAL Logo" class="halal-logo" />
+                <input type="text" class="editable-input unit-price" value="${p.unitPrice}" />
+                <div class="savings-ribbon">SIE SPAREN</div>
+                <input type="text" class="editable-input savings-amount" value="${p.saving}" />
+                <img src="${p.image}" alt="Produktfoto" class="product-image" />
+                <input type="text" class="editable-input pack-size" value="${p.packageSize}" />
+                <div class="prices">
+                  <input type="number" step="0.01" class="editable-input old-price" value="${p.oldPrice}" />
+                  <input type="number" step="0.01" class="editable-input new-price" value="${p.newPrice}" />
+                </div>
+              </div>
+              <button onclick="saveProduct(${boxNumber}); event.stopPropagation();" class="absolute top-2 right-2 action-btn save-btn" title="Save">✔</button>
+              <button onclick="cancelEdit(${boxNumber}); event.stopPropagation();" class="absolute top-2 left-2 action-btn cancel-btn" title="Cancel">✖</button>
+            `;
+                } else {
+                  box.innerHTML = `
+              <div class="label-container">
+                <img src="${p.logo}" alt="Produkt Logo" class="product-logo" />
+                <div class="product-names">
+                  <div class="german-name">${p.nameDe}</div>
+                  <div class="turkish-name">${p.nameTr}</div>
+                </div>
+                <img src="./public/images/halal.png" alt="HALAL Logo" class="halal-logo" />
+                <div class="unit-price">${p.unitPrice}</div>
+                <div class="savings-ribbon">SIE SPAREN</div>
+                <div class="savings-amount">${p.saving}</div>
+                <img src="${p.image}" alt="Produktfoto" class="product-image" />
+                <div class="pack-size">${p.packageSize}</div>
+                <div class="prices">
+                  <div class="old-price">€${p.oldPrice.toFixed(2)}</div>
+                  <div class="new-price">€${p.newPrice.toFixed(2)}</div>
+                </div>
+              </div>
+              <button onclick="editProduct(${boxNumber}); event.stopPropagation();" class="absolute top-2 right-2 action-btn edit-btn" title="Edit">✎</button>
+            `;
+                }
+              } else {
+                box.innerHTML = `
+            <div class="product-box">
+              <div class="product-box-icon">📦</div>
+              <div class="product-box-text">Select Product ${boxNumber}</div>
+            </div>`;
+              }
+
+              row.appendChild(box);
+              currentBoxNumber++;
+            }
+
+            const gridItem = document.createElement("div");
+            gridItem.className = "grid-item";
+            gridItem.appendChild(row);
+            templateGrid.appendChild(gridItem);
+          });
+
+          addProductBoxDragListeners();
+          addClickListeners();
+        });
+      }
+
+      // Function to fetch user profile and update header
+      function fetchUserProfile(callback) {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+          console.error("No authToken found. Please log in.");
+          callback("./public/images/dummy2.jpg", "./public/images/dummy3.jpg"); // Fallback values
+          return;
+        }
+
+        $.ajax({
+          url: "https://api.marketim.app/app/profile",
+          type: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          success: function (response) {
+            const { companyLogo, coverImage } = response.user;
+            const baseUrl = "https://api.marketim.app/uploads/";
+            callback(
+              companyLogo
+                ? `${baseUrl}${companyLogo}`
+                : "./public/images/dummy2.jpg", // Fallback for logo
+              coverImage
+                ? `${baseUrl}${coverImage}`
+                : "./public/images/dummy3.jpg" // Fallback for cover
+            );
+          },
+          error: function (xhr) {
+            console.error("Error fetching user profile:", xhr.responseText);
+            callback(
+              "./public/images/dummy2.jpg",
+              "./public/images/dummy3.jpg"
+            ); // Fallback values on error
+          },
+        });
+      }
+      function addProductBoxDragListeners() {
+        const boxes = document.querySelectorAll(".product-box-wrapper");
+
+        boxes.forEach((box) => {
+          box.removeEventListener("dragstart", handleBoxDragStart);
+          box.removeEventListener("dragend", handleBoxDragEnd);
+          box.removeEventListener("dragover", handleBoxDragOver);
+          box.removeEventListener("drop", handleBoxDrop);
+
+          box.addEventListener("dragstart", handleBoxDragStart);
+          box.addEventListener("dragend", handleBoxDragEnd);
+          box.addEventListener("dragover", handleBoxDragOver);
+          box.addEventListener("drop", handleBoxDrop);
+        });
+      }
+
+      function handleBoxDragStart(e) {
+        const box = e.currentTarget;
+        box.classList.add("dragging");
+        e.dataTransfer.setData("text/plain", box.getAttribute("data-box"));
+      }
+
+      function handleBoxDragEnd(e) {
+        const box = e.currentTarget;
+        box.classList.remove("dragging");
+      }
+
+      function handleBoxDragOver(e) {
+        e.preventDefault();
+      }
+
+      function handleBoxDrop(e) {
+        e.preventDefault();
+        const draggedBoxNumber = e.dataTransfer.getData("text/plain");
+        const targetBoxNumber = e.currentTarget.getAttribute("data-box");
+
+        if (draggedBoxNumber === targetBoxNumber) return;
+
+        const draggedProduct = selectedProducts[draggedBoxNumber];
+        const targetProduct = selectedProducts[targetBoxNumber];
+        const draggedEditingState = editingState[draggedBoxNumber];
+        const targetEditingState = editingState[targetBoxNumber];
+
+        if (draggedProduct || targetProduct) {
+          selectedProducts[draggedBoxNumber] = targetProduct;
+          selectedProducts[targetBoxNumber] = draggedProduct;
+
+          editingState[draggedBoxNumber] = targetEditingState;
+          editingState[targetBoxNumber] = draggedEditingState;
+        }
+
+        updateGridLayout();
+      }
+
+      function addClickListeners() {
+        const boxes = document.querySelectorAll(".product-box-wrapper");
+
+        boxes.forEach((box) => {
+          box.removeEventListener("click", handleBoxClick);
+          box.addEventListener("click", handleBoxClick);
+        });
+      }
+
+      function handleBoxClick(e) {
+        const box = e.currentTarget;
+        const boxNumber = box.getAttribute("data-box");
+
+        // Only open the product list if the box is empty (no product selected) or if the click target is not a button
+        if (!selectedProducts[boxNumber] && !e.target.closest("button")) {
+          openProductList(boxNumber);
+        }
+      }
+
+      function editProduct(boxNumber) {
+        editingState[boxNumber] = true;
+        updateGridLayout();
+      }
+
+      function saveProduct(boxNumber) {
+        const box = document.querySelector(`[data-box="${boxNumber}"]`);
+        const inputs = box.querySelectorAll("input");
+
+        const updatedProduct = { ...selectedProducts[boxNumber] };
+        updatedProduct.nameDe = inputs[0].value;
+        updatedProduct.nameTr = inputs[1].value;
+        updatedProduct.unitPrice = inputs[2].value;
+        updatedProduct.saving = inputs[3].value;
+        updatedProduct.packageSize = inputs[4].value;
+        updatedProduct.oldPrice =
+          parseFloat(inputs[5].value) || updatedProduct.oldPrice;
+        updatedProduct.newPrice =
+          parseFloat(inputs[6].value) || updatedProduct.newPrice;
+
+        selectedProducts[boxNumber] = updatedProduct;
+        editingState[boxNumber] = false;
+        updateGridLayout();
+      }
+
+      function cancelEdit(boxNumber) {
+        editingState[boxNumber] = false;
+        updateGridLayout();
+      }
+
+      function openProductList(boxNumber) {
+        currentBox = boxNumber;
+        const productList = document.getElementById("productList");
+        productList.innerHTML = "";
+
+        products.forEach((product) => {
+          const li = document.createElement("li");
+          li.className =
+            "p-4 border border-transparent rounded-md hover:bg-purple-100 cursor-pointer flex items-center";
+          li.innerHTML = `
+        <img src="${product.image}" alt="${
+            product.nameTr
+          }" class="w-12 h-12 object-cover rounded-md">
+        <div class="flex-1 pl-4">
+          <div class="text-sm font-medium">${product.nameTr}</div>
+          <div class="text-sm">€${product.newPrice.toFixed(2)}</div>
+          <div class="text-xs text-gray-600 mt-1">${product.nameDe}</div>
+          <div class="text-xs mt-1 text-green-600">Available</div>
+        </div>
+      `;
+          li.onclick = () => selectProduct(product);
+          productList.appendChild(li);
+        });
+
+        document.getElementById("productModal").classList.remove("hidden");
+      }
+
+      function closeProductList() {
+        document.getElementById("productModal").classList.add("hidden");
+        currentBox = null;
+      }
+
+      function selectProduct(product) {
+        if (currentBox) {
+          selectedProducts[currentBox] = product;
+          updateGridLayout();
+          closeProductList();
+        }
+      }
+
+      function exportPDFWithDOMToImage() {
+        const { jsPDF } = window.jspdf;
+        const node = document.getElementById("templateGridContainer");
+        const backgroundColor =
+          document
+            .getElementById("templateGrid")
+            .style.getPropertyValue("--bg-color") || "#e0f7fa";
+
+        const elementsToHide = document.querySelectorAll("h2, .mb-6, button");
+        elementsToHide.forEach((el) => (el.style.display = "none"));
+
+        node.style.width = "794px";
+
+        domtoimage
+          .toPng(node, {
+            bgcolor: backgroundColor,
+            width: 794,
+            quality: 1,
+          })
+          .then(function (dataUrl) {
+            const pdf = new jsPDF({
+              orientation: "portrait",
+              unit: "mm",
+              format: "a4",
+            });
+
+            const a4Width = 210;
+            const a4Height = 297;
+            const imgProps = pdf.getImageProperties(dataUrl);
+            const imgWidth = imgProps.width;
+            const imgHeight = imgProps.height;
+
+            pdf.setFillColor(backgroundColor);
+            pdf.rect(0, 0, a4Width, a4Height, "F");
+
+            const margin = 10;
+            const maxWidth = a4Width - 2 * margin;
+            const maxHeightPx = a4Height - 2 * margin;
+            let pdfImgWidth = imgWidth * 0.264583;
+            let pdfImgHeight = imgHeight * 0.264583;
+
+            const aspectRatio = imgWidth / imgHeight;
+            if (pdfImgWidth > maxWidth) {
+              pdfImgWidth = maxWidth;
+              pdfImgHeight = pdfImgWidth / aspectRatio;
+            }
+            if (pdfImgHeight > maxHeightPx) {
+              pdfImgHeight = maxHeightPx;
+              pdfImgWidth = pdfImgHeight * aspectRatio;
+            }
+
+            const xOffset = (a4Width - pdfImgWidth) / 2;
+            const yOffset = margin;
+
+            pdf.addImage(
+              dataUrl,
+              "PNG",
+              xOffset,
+              yOffset,
+              pdfImgWidth,
+              pdfImgHeight
+            );
+            pdf.save("products.pdf");
+          })
+          .catch(function (error) {
+            console.error("DOM-to-image error:", error);
+          })
+          .finally(() => {
+            elementsToHide.forEach((e) => (e.style.display = ""));
+            node.style.width = "";
+          });
+      }
+
+      // Call the function to set template on page load
+      $(document).ready(function () {
+        setTemplateFromQueryParam();
+        // updateGridLayoutOptions();
+        updateBackgroundColor();
+      });
+    </script>
+  </body>
+</html>

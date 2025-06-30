@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marketim Login</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div
+      class="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500"
+    >
+      <div
+        class="bg-white rounded-lg shadow-lg p-10 w-full max-w-md text-center"
+      >
+        <h1 class="text-4xl font-bold text-gray-800">Marketim</h1>
+        <p class="text-lg font-semibold mt-2 text-gray-700">
+          Firmenprofil erstellen
+        </p>
+
+        <div class="mt-8 flex gap-6">
+          <!-- Cover Image -->
+          <div class="w-1/2 text-center">
+            <label class="block text-gray-500 mb-2">Titelbild</label>
+            <label for="cover-upload" class="cursor-pointer inline-block">
+              <div
+                id="cover-preview"
+                class="w-28 h-28 border-2 border-gray-300 border-dashed rounded-md flex items-center justify-center bg-gray-50 hover:bg-gray-100 mx-auto"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="48px"
+                  viewBox="0 0 24 24"
+                  fill="#cacaca"
+                >
+                  <path d="M0 0h24v24H0z" fill="none" />
+                  <path
+                    d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM5 5h14v6l-4.5-3.6-3.5 4.2L8 9 5 12.5V5zm0 14v-1l3-3.5 2.5 3.01 3.5-4.5L19 18H5z"
+                  />
+                </svg>
+              </div>
+              <input
+                id="cover-upload"
+                type="file"
+                accept="image/*"
+                class="hidden"
+              />
+            </label>
+          </div>
+
+          <!-- Firmenlogo -->
+          <div class="w-1/2 text-center">
+            <label class="block text-gray-500 mb-2">Firmenlogo</label>
+            <label for="logo-upload" class="cursor-pointer inline-block">
+              <div
+                id="logo-preview"
+                class="w-28 h-28 border-2 border-gray-300 border-dashed rounded-md flex items-center justify-center bg-gray-50 hover:bg-gray-100 mx-auto"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="48px"
+                  viewBox="0 -960 960 960"
+                  width="48px"
+                  fill="#cacaca"
+                >
+                  <path
+                    d="M480-260q75 0 127.5-52.5T660-440q0-75-52.5-127.5T480-620q-75 0-127.5 52.5T300-440q0 75 52.5 127.5T480-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l74-80h240l74 80h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z"
+                  />
+                </svg>
+              </div>
+              <input
+                id="logo-upload"
+                accept="image/*"
+                type="file"
+                class="hidden"
+              />
+            </label>
+          </div>
+        </div>
+
+        <p id="formMessage" class="text-sm text-center mt-4"></p>
+
+        <div class="mt-8">
+          <button
+            type="button"
+            class="w-full bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-md"
+          >
+            Beenden
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    $(document).ready(function () {
+      const authToken = localStorage.getItem("authToken");
+      if (!authToken) {
+        alert("Nicht autorisiert. Bitte zuerst einloggen.");
+        window.location.href = "/login";
+        return;
+      }
+
+      // Preview handler
+      function previewImage(inputId, previewId) {
+        const fileInput = document.getElementById(inputId);
+        const previewDiv = document.getElementById(previewId);
+
+        fileInput.addEventListener("change", function () {
+          const file = this.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              previewDiv.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-md" />`;
+            };
+            reader.readAsDataURL(file);
+          } else {
+            previewDiv.innerHTML =
+              '<span class="text-gray-400 text-sm">Bild auswählen</span>';
+          }
+        });
+      }
+
+      previewImage("cover-upload", "cover-preview");
+      previewImage("logo-upload", "logo-preview");
+
+      // Upload on button click
+      $("button").on("click", function () {
+        const coverFile = $("#cover-upload")[0].files[0];
+        const logoFile = $("#logo-upload")[0].files[0];
+
+        if (!coverFile && !logoFile) {
+          alert("Bitte mindestens ein Bild auswählen.");
+          return;
+        }
+
+        const formData = new FormData();
+        if (coverFile) formData.append("coverImage", coverFile);
+        if (logoFile) formData.append("companyLogo", logoFile);
+
+        $.ajax({
+          url: "https://api.marketim.app/app/upload-company-images", // You can adjust later
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + authToken,
+          },
+          processData: false,
+          contentType: false,
+          data: formData,
+          success: function (res) {
+            $("#formMessage")
+              .text("Bilder erfolgreich hochgeladen!")
+              .addClass("text-green-600");
+            setTimeout(() => {
+              window.location.href = "/product-template";
+            }, 2000);
+          },
+          error: function (xhr) {
+            let msg =
+              "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.";
+            if (xhr.responseJSON?.message) {
+              msg = xhr.responseJSON.message;
+            }
+            $("#formMessage").text(msg).addClass("text-red-600");
+          },
+        });
+      });
+    });
+  </script>
+</html>

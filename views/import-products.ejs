@@ -81,32 +81,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
 
     <script>
-      const products = [
-        {
-          id: 1,
-          nameTr: "Yedoy Kaşar Peyniri",
-          nameDe: "Kashkaval Schnittkäse",
-          oldPrice: 2.99,
-          newPrice: 1.99,
-          unitPrice: "1kg = 4.98",
-          saving: "1,-",
-          packageSize: "400 g Packung",
-          image: "./public/images/dummy3.jpg",
-          logo: "./public/images/dummy2.jpg",
-        },
-        {
-          id: 2,
-          nameTr: "Zeytin Ezmesi",
-          nameDe: "Olivenpaste",
-          oldPrice: 3.49,
-          newPrice: 2.49,
-          unitPrice: "1kg = 9.96",
-          saving: "1,-",
-          packageSize: "250 g Packung",
-          image: "./public/images/dummy3.jpg",
-          logo: "./public/images/dummy2.jpg",
-        },
-      ];
+      let products = []; // Initialize as empty array to be populated by API
 
       const selectedProducts = {};
       let currentBox = null;
@@ -124,6 +99,48 @@
         ],
       };
 
+      // Function to fetch products from API
+      function fetchProducts() {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+          console.error("No authToken found. Please log in.");
+          return;
+        }
+
+        $.ajax({
+          url: "https://api.marketim.app/admin/products",
+          type: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          success: function (response) {
+            products = response.map((product) => ({
+              id: product._id,
+              nameTr: product.title.tr,
+              nameDe: product.title.de,
+              oldPrice: parseFloat(product.base_price.replace(",", ".")) || 0,
+              newPrice: parseFloat(product.base_price.replace(",", ".")) || 0, // Adjust if newPrice differs
+              unitPrice: "1kg = " + product.unit_price,
+              saving: "0,-", // Add logic if saving is available in API
+              packageSize: `${product.weight.unit_vol} ${product.weight.unit_type} ${product.package_type}`,
+              image:
+                product.images.length > 0
+                  ? `https://api.marketim.app/uploads/${product.images[0]}`
+                  : "./public/images/dummy3.jpg",
+              logo: product.thumbnail
+                ? `https://api.marketim.app/uploads/${product.thumbnail}`
+                : "./public/images/dummy2.jpg",
+              isHalal: product.isHalal,
+            }));
+            updateGridLayout(); // Refresh grid with new products
+          },
+          error: function (xhr) {
+            console.error("Error fetching products:", xhr.responseText);
+            products = []; // Reset to empty on error, or use fallback data
+          },
+        });
+      }
+
       // Function to update template selection based on query parameter
       function setTemplateFromQueryParam() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -134,7 +151,6 @@
 
         if (templateParam && validTemplates.includes(templateParam)) {
           templateSelect.value = templateParam; // Set to the valid template value
-          // Update the grid layout options
         }
         updateGridLayoutOptions();
       }
@@ -243,18 +259,36 @@
               <div class="label-container">
                 <img src="${p.logo}" alt="Produkt Logo" class="product-logo" />
                 <div class="product-names">
-                  <input type="text" class="editable-input german-name" value="${p.nameDe}" />
-                  <input type="text" class="editable-input turkish-name" value="${p.nameTr}" />
+                  <input type="text" class="editable-input german-name" value="${
+                    p.nameDe
+                  }" />
+                  <input type="text" class="editable-input turkish-name" value="${
+                    p.nameTr
+                  }" />
                 </div>
-                <img src="./public/images/halal.png" alt="HALAL Logo" class="halal-logo" />
-                <input type="text" class="editable-input unit-price" value="${p.unitPrice}" />
+                ${
+                  p.isHalal
+                    ? `<img src="./public/images/halal.png" alt="HALAL Logo" class="halal-logo" />`
+                    : ""
+                }
+                <input type="text" class="editable-input unit-price" value="${
+                  p.unitPrice
+                }" />
                 <div class="savings-ribbon">SIE SPAREN</div>
-                <input type="text" class="editable-input savings-amount" value="${p.saving}" />
+                <input type="text" class="editable-input savings-amount" value="${
+                  p.saving
+                }" />
                 <img src="${p.image}" alt="Produktfoto" class="product-image" />
-                <input type="text" class="editable-input pack-size" value="${p.packageSize}" />
+                <input type="text" class="editable-input pack-size" value="${
+                  p.packageSize
+                }" />
                 <div class="prices">
-                  <input type="number" step="0.01" class="editable-input old-price" value="${p.oldPrice}" />
-                  <input type="number" step="0.01" class="editable-input new-price" value="${p.newPrice}" />
+                  <input type="number" step="0.01" class="editable-input old-price" value="${
+                    p.oldPrice
+                  }" />
+                  <input type="number" step="0.01" class="editable-input new-price" value="${
+                    p.newPrice
+                  }" />
                 </div>
               </div>
               <button onclick="saveProduct(${boxNumber}); event.stopPropagation();" class="absolute top-2 right-2 action-btn save-btn" title="Save">✔</button>
@@ -268,7 +302,11 @@
                   <div class="german-name">${p.nameDe}</div>
                   <div class="turkish-name">${p.nameTr}</div>
                 </div>
-                <img src="./public/images/halal.png" alt="HALAL Logo" class="halal-logo" />
+                ${
+                  p.isHalal
+                    ? `<img src="./public/images/halal.png" alt="HALAL Logo" class="halal-logo" />`
+                    : ""
+                }
                 <div class="unit-price">${p.unitPrice}</div>
                 <div class="savings-ribbon">SIE SPAREN</div>
                 <div class="savings-amount">${p.saving}</div>
@@ -341,6 +379,7 @@
           },
         });
       }
+
       function addProductBoxDragListeners() {
         const boxes = document.querySelectorAll(".product-box-wrapper");
 
@@ -557,10 +596,10 @@
           });
       }
 
-      // Call the function to set template on page load
+      // Call the function to set template and fetch products on page load
       $(document).ready(function () {
         setTemplateFromQueryParam();
-        // updateGridLayoutOptions();
+        fetchProducts(); // Fetch products on page load
         updateBackgroundColor();
       });
     </script>

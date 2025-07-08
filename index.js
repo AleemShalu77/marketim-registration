@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser"); // Make sure to install cookie-parser
+const request = require("request");
 
 const app = express();
 process.on("unhandledRejection", (reason, promise) => {
@@ -16,6 +17,26 @@ app.set("view engine", "ejs");
 
 // static files
 app.use("/public", express.static(path.join(__dirname, "public")));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res) => {
+      res.set("Access-Control-Allow-Origin", "*"); // Adjust for production security
+    },
+  })
+);
+
+app.get("/proxy/image", (req, res) => {
+  const imageUrl = req.query.url;
+  if (!imageUrl) return res.status(400).send("Image URL is required");
+  request
+    .get(imageUrl)
+    .on("error", (err) => {
+      console.error("Proxy error:", err);
+      res.status(500).send("Error fetching image");
+    })
+    .pipe(res);
+});
 
 // routes
 const authRoutes = require("./routes/authRoutes");

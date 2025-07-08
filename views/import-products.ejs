@@ -106,6 +106,7 @@
           console.error("No authToken found. Please log in.");
           return;
         }
+        const proxyUrl = "https://marketim.de/proxy/image?url="; // Use your deployed server
 
         $.ajax({
           url: "https://api.marketim.app/admin/products",
@@ -125,10 +126,10 @@
               packageSize: `${product.weight.unit_vol} ${product.weight.unit_type} ${product.package_type}`,
               image:
                 product.images.length > 0
-                  ? `https://api.marketim.app/uploads/${product.images[0]}`
+                  ? `${proxyUrl}https://api.marketim.app/uploads/${product.images[0]}`
                   : "./public/images/dummy3.jpg",
               logo: product.thumbnail
-                ? `https://api.marketim.app/uploads/${product.thumbnail}`
+                ? `${proxyUrl}https://api.marketim.app/uploads/${product.thumbnail}`
                 : "./public/images/dummy2.jpg",
               isHalal: product.isHalal,
             }));
@@ -352,6 +353,8 @@
           return;
         }
 
+        const proxyUrl = "https://marketim.de/proxy/image?url="; // Use your deployed server
+
         $.ajax({
           url: "https://api.marketim.app/app/profile",
           type: "GET",
@@ -363,10 +366,10 @@
             const baseUrl = "https://api.marketim.app/uploads/";
             callback(
               companyLogo
-                ? `${baseUrl}${companyLogo}`
+                ? `${proxyUrl}${baseUrl}${companyLogo}`
                 : "./public/images/dummy2.jpg", // Fallback for logo
               coverImage
-                ? `${baseUrl}${coverImage}`
+                ? `${proxyUrl}${baseUrl}${coverImage}`
                 : "./public/images/dummy3.jpg" // Fallback for cover
             );
           },

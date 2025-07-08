@@ -84,24 +84,50 @@
 
     <script>
       $(document).ready(function () {
-        // Check auth token
         const authToken = localStorage.getItem("authToken");
+
         if (!authToken) {
           alert("Nicht autorisiert. Bitte zuerst einloggen.");
           window.location.href = "/login";
           return;
         }
 
-        // Submit the form via AJAX
+        // 🔍 Check if company profile already filled
+        $.ajax({
+          url: "https://api.marketim.app/app/profile",
+          type: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          success: function (response) {
+            const profile = response?.user;
+
+            if (
+              profile &&
+              profile.companyName &&
+              profile.companyAddress.street &&
+              profile.companyAddress.city &&
+              profile.companyTxn
+            ) {
+              // ✅ Redirect if profile already exists
+              window.location.href = "/profileLogoCover";
+            }
+          },
+          error: function () {
+            console.error("Fehler beim Laden des Benutzerprofils");
+          },
+        });
+
+        // 📨 Submit company profile form
         $("#profileForm").on("submit", function (e) {
           e.preventDefault();
 
           const formData = {
             companyName: $("input[name='companyName']").val().trim(),
             street: $("input[name='street']").val().trim(),
-            zip: $("input[name='zip']").val().trim(),
+            postcode: $("input[name='zip']").val().trim(),
             city: $("input[name='city']").val().trim(),
-            taxNumber: $("input[name='taxNumber']").val().trim(),
+            companyTxn: $("input[name='taxNumber']").val().trim(),
           };
 
           $("#formMessage").text("").removeClass("text-green-600 text-red-600");
@@ -111,15 +137,14 @@
             type: "POST",
             contentType: "application/json",
             headers: {
-              Authorization: "Bearer " + authToken,
+              Authorization: `Bearer ${authToken}`,
             },
             data: JSON.stringify(formData),
-            success: function (response) {
+            success: function () {
               $("#formMessage")
                 .text("Firmenprofil erfolgreich erstellt.")
                 .addClass("text-green-600");
 
-              // Optional: Redirect after success
               setTimeout(() => {
                 window.location.href = "/profileLogoCover";
               }, 2000);

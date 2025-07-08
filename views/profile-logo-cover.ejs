@@ -101,6 +101,25 @@
         return;
       }
 
+      $.ajax({
+        url: "https://api.marketim.app/app/profile",
+        type: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        success: function (response) {
+          const profile = response?.user;
+
+          if (profile && profile.companyLogo && profile.coverImage) {
+            // ✅ Redirect if profile already exists
+            window.location.href = "/product-template";
+          }
+        },
+        error: function () {
+          console.error("Fehler beim Laden des Benutzerprofils");
+        },
+      });
+
       // Preview handler
       function previewImage(inputId, previewId) {
         const fileInput = document.getElementById(inputId);

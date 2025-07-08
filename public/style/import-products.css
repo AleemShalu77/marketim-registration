@@ -352,3 +352,7 @@ input[type="color"]::-moz-color-swatch {
   color: #4b5563;
   text-align: center;
 }
+.grid.gap-4.w-full.grid-cols-1 .product-box-wrapper {
+  width: 50%;
+  margin: 0 auto;
+}

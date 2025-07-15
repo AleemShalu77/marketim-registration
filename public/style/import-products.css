@@ -403,3 +403,39 @@ input[type="color"]::-moz-color-swatch {
   border-color: #0e0eb3;
   box-shadow: 0 0 5px rgba(14, 14, 179, 0.3);
 }
+
+#currentDateInput {
+  outline: none;
+  transition: border-color 0.2s;
+}
+#currentDateInput:focus {
+  border-color: #4ade80; /* Green focus border */
+}
+#dateColorPicker {
+  cursor: pointer;
+}
+#dateFontSize {
+  outline: none;
+  transition: border-color 0.2s;
+}
+#dateFontSize:focus {
+  border-color: #4ade80; /* Green focus border */
+}
+
+#customTextInput {
+  outline: none;
+  transition: border-color 0.2s;
+}
+#customTextInput:focus {
+  border-color: #4ade80; /* Green focus border */
+}
+#customTextColorPicker {
+  cursor: pointer;
+}
+#customTextFontSize {
+  outline: none;
+  transition: border-color 0.2s;
+}
+#customTextFontSize:focus {
+  border-color: #4ade80; /* Green focus border */
+}

@@ -106,7 +106,7 @@
             const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
             if (decodedToken.exp > currentTime) {
               // Token is valid, redirect to /profile immediately
-              window.location.href = "/profile";
+              window.location.href = "/dashboard";
               return; // Stop further execution
             } else {
               // Token is expired, remove it

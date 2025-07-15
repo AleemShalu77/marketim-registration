@@ -207,10 +207,39 @@
                   .text("Login erfolgreich! Sie werden weitergeleitet...")
                   .addClass("text-green-600");
 
-                // Redirect to /profile after a delay
-                setTimeout(() => {
-                  window.location.href = "/profile";
-                }, 2000);
+                $.ajax({
+                  url: "https://api.marketim.app/app/profile",
+                  type: "GET",
+                  headers: {
+                    Authorization: `Bearer ${response.token}`,
+                  },
+                  success: function (resp) {
+                    const profile = resp?.user;
+
+                    if (
+                      profile &&
+                      profile.companyName &&
+                      profile.companyAddress?.street &&
+                      profile.companyAddress?.city &&
+                      profile.companyTxn
+                    ) {
+                      // Profile base info exists
+                      if (profile.companyLogo && profile.coverImage) {
+                        window.location.href = "/dashboard";
+                      } else {
+                        window.location.href = "/profileLogoCover";
+                      }
+                    } else {
+                      // If profile base info is missing, go to /profile after short delay
+                      setTimeout(() => {
+                        window.location.href = "/profile";
+                      }, 2000);
+                    }
+                  },
+                  error: function () {
+                    console.error("Error loading user profile");
+                  },
+                });
               },
               error: function (xhr) {
                 let errorMessage =

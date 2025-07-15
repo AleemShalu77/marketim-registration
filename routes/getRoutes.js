@@ -61,5 +61,16 @@ router.get("/import-products", async (req, res, next) => {
     next(error);
   }
 });
+router.get("/dashboard", async (req, res, next) => {
+  try {
+    res.render("dashboard", {
+      title: "Dashboard",
+      path: "/dashboard",
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
 
 module.exports = router;

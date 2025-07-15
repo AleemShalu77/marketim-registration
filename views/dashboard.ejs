@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Marketim Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="../public/style/dashboard.css" />
+  </head>
+  <body class="min-h-screen bg-gray-100 flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md p-4 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <img
+          id="companyLogo"
+          src="../public/images/dummy2.jpg"
+          alt="Company Logo"
+          class="h-10 w-10 rounded-full object-cover"
+        />
+        <h1 class="text-2xl font-bold text-gray-800">Marketim Dashboard</h1>
+      </div>
+      <button
+        onclick="logout()"
+        class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      >
+        Logout
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-6 flex-1">
+      <!-- KPI Boxes -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- KPI 1: Total Products -->
+        <div
+          class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg flex items-center justify-between"
+        >
+          <div>
+            <h3 class="text-lg font-semibold">Total Products</h3>
+            <p id="totalProducts" class="text-3xl font-bold">0</p>
+          </div>
+          <svg
+            class="w-12 h-12"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20 7l-8-4-8 4m16 0v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7m16 0l-8 4m-8-4l8 4"
+            ></path>
+          </svg>
+        </div>
+        <!-- KPI 2: Total Templates -->
+        <div
+          class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg shadow-lg flex items-center justify-between"
+        >
+          <div>
+            <h3 class="text-lg font-semibold">Total Templates</h3>
+            <p id="totalTemplates" class="text-3xl font-bold">0</p>
+          </div>
+          <svg
+            class="w-12 h-12"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
+            ></path>
+          </svg>
+        </div>
+        <!-- KPI 3: Total Revenue -->
+        <div
+          class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg shadow-lg flex items-center justify-between"
+        >
+          <div>
+            <h3 class="text-lg font-semibold">Total Revenue</h3>
+            <p id="totalRevenue" class="text-3xl font-bold">€0.00</p>
+          </div>
+          <svg
+            class="w-12 h-12"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Profile and Table Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Profile Details -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h2 class="text-xl font-semibold mb-4">Profile Details</h2>
+          <div class="flex items-center gap-4 mb-4">
+            <img
+              id="profileLogo"
+              src="../public/images/dummy2.jpg"
+              alt="Profile Logo"
+              class="h-16 w-16 rounded-full object-cover"
+            />
+            <div>
+              <h3 id="profileName" class="text-lg font-medium">Loading...</h3>
+              <p id="profileEmail" class="text-gray-600">Loading...</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <p>
+              <strong>Company:</strong> <span id="companyName">Loading...</span>
+            </p>
+            <p>
+              <strong>Location:</strong>
+              <span id="companyLocation">Loading...</span>
+            </p>
+            <p>
+              <strong>Member Since:</strong>
+              <span id="memberSince">Loading...</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+          <h2 class="text-xl font-semibold mb-4">Recent Products</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Image
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Name (TR)
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Name (DE)
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Price
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="productsTableBody"
+                class="bg-white divide-y divide-gray-200"
+              >
+                <!-- Table rows will be populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize data
+      let products = [];
+
+      // Fetch user profile
+      function fetchUserProfile() {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+          console.error("No authToken found. Please log in.");
+          updateProfileUI({});
+          return;
+        }
+
+        const proxyUrl = "https://marketim.de/proxy/image?url=";
+        const baseUrl = "https://api.marketim.app/uploads/";
+
+        $.ajax({
+          url: "https://api.marketim.app/app/profile",
+          type: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          success: function (response) {
+            const user = response.user || {};
+            updateProfileUI({
+              logo: user.companyLogo
+                ? `${proxyUrl}${baseUrl}${user.companyLogo}`
+                : "../public/images/dummy2.jpg",
+              name: user.name || "Unknown User",
+              email: user.email || "N/A",
+              company: user.companyName || "N/A",
+              location: user.location || "N/A",
+              memberSince: user.createdAt
+                ? new Date(user.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "N/A",
+            });
+          },
+          error: function (xhr) {
+            console.error("Error fetching user profile:", xhr.responseText);
+            updateProfileUI({});
+          },
+        });
+      }
+
+      // Update profile UI
+      function updateProfileUI(profile) {
+        document.getElementById("companyLogo").src =
+          profile.logo || "../public/images/dummy2.jpg";
+        document.getElementById("profileLogo").src =
+          profile.logo || "../public/images/dummy2.jpg";
+        document.getElementById("profileName").textContent =
+          profile.name || "Unknown User";
+        document.getElementById("profileEmail").textContent =
+          profile.email || "N/A";
+        document.getElementById("companyName").textContent =
+          profile.company || "N/A";
+        document.getElementById("companyLocation").textContent =
+          profile.location || "N/A";
+        document.getElementById("memberSince").textContent =
+          profile.memberSince || "N/A";
+      }
+
+      // Fetch products and update KPIs
+      function fetchProducts() {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+          console.error("No authToken found. Please log in.");
+          updateProductsUI([]);
+          return;
+        }
+
+        const proxyUrl = "https://marketim.de/proxy/image?url=";
+
+        $.ajax({
+          url: "https://api.marketim.app/admin/products",
+          type: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          success: function (response) {
+            products = response.map((product) => ({
+              id: product._id,
+              nameTr: product.title.tr,
+              nameDe: product.title.de,
+              price: parseFloat(product.base_price.replace(",", ".")) || 0,
+              image:
+                product.images.length > 0
+                  ? `${proxyUrl}https://api.marketim.app/uploads/${product.images[0]}`
+                  : "../public/images/dummy3.jpg",
+              status: product.status || "Available",
+            }));
+            updateProductsUI(products);
+            updateKPIs(products);
+          },
+          error: function (xhr) {
+            console.error("Error fetching products:", xhr.responseText);
+            updateProductsUI([]);
+            updateKPIs([]);
+          },
+        });
+      }
+
+      // Update products table
+      function updateProductsUI(products) {
+        const tableBody = document.getElementById("productsTableBody");
+        tableBody.innerHTML = "";
+        products.slice(0, 5).forEach((product) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+              <img src="${product.image}" alt="${
+            product.nameTr
+          }" class="h-10 w-10 object-cover rounded" />
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
+              product.nameTr
+            }</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
+              product.nameDe
+            }</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">€${product.price.toFixed(
+              2
+            )}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                product.status === "Available"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }">
+                ${product.status}
+              </span>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      // Update KPI boxes
+      function updateKPIs(products) {
+        // KPI 1: Total Products
+        document.getElementById("totalProducts").textContent = products.length;
+
+        // KPI 2: Total Templates (Placeholder, as API not provided)
+        document.getElementById("totalTemplates").textContent = "10"; // Replace with actual data if available
+
+        // KPI 3: Total Revenue (Placeholder, as API not provided)
+        const totalRevenue = products.reduce(
+          (sum, product) => sum + product.price,
+          0
+        );
+        document.getElementById(
+          "totalRevenue"
+        ).textContent = `€${totalRevenue.toFixed(2)}`;
+      }
+
+      // Logout function
+      function logout() {
+        localStorage.removeItem("authToken");
+        window.location.href = "/login.html"; // Adjust to your login page URL
+      }
+
+      // Initialize dashboard
+      $(document).ready(function () {
+        fetchUserProfile();
+        fetchProducts();
+      });
+    </script>
+  </body>
+</html>

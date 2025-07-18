@@ -57,9 +57,7 @@
       <div id="templateGrid"></div>
     </div>
 
-    <button onclick="exportPDFWithDOMToImage()" class="download-btn">
-      Download PDF
-    </button>
+    <button onclick="saveTemplate()" class="download-btn">Save Template</button>
 
     <!-- Edit Product Modal -->
     <div
@@ -189,6 +187,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <script src="https://unpkg.com/jwt-decode@3.1.2/build/jwt-decode.js"></script>
 
     <script>
       let products = [];
@@ -667,6 +666,18 @@
         });
       }
 
+      function getUserIdFromToken() {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) return null;
+        try {
+          const decoded = jwt_decode(authToken);
+          return decoded.id; // Assuming the JWT payload has a user_id field
+        } catch (error) {
+          console.error("Error decoding JWT:", error);
+          return null;
+        }
+      }
+
       function addProductBoxDragListeners() {
         const boxes = document.querySelectorAll(".product-box-wrapper");
         boxes.forEach((box) => {
@@ -741,7 +752,7 @@
           document.getElementById("editGermanName").value = product.nameDe;
           document.getElementById("editTurkishName").value = product.nameTr;
           document.getElementById("editUnitPrice").value = product.unitPrice;
-          document.getElementByfId("editSaving").value = product.saving;
+          document.getElementById("editSaving").value = product.saving;
           document.getElementById("editPackageSize").value =
             product.packageSize;
           document.getElementById("editOldPrice").value = product.oldPrice;
@@ -822,13 +833,26 @@
         }
       }
 
-      function exportPDFWithDOMToImage() {
+      function saveTemplate() {
         const { jsPDF } = window.jspdf;
         const node = document.getElementById("templateGridContainer");
         const backgroundColor =
           document
             .getElementById("templateGrid")
             .style.getPropertyValue("--bg-color") || "#e0f7fa";
+        const templateSize = parseInt(
+          document.getElementById("templateSelect").value
+        );
+        const gridLayoutSelect = document.getElementById("gridLayoutSelect");
+        const selectedLayout = gridLayoutSelect.value
+          ? gridLayoutSelect.value.split(",").map(Number)
+          : gridLayouts[templateSize][0];
+        const userId = getUserIdFromToken();
+
+        if (!userId) {
+          alert("Error: User not authenticated. Please log in.");
+          return;
+        }
 
         const elementsToHide = document.querySelectorAll("h2, .mb-6, button");
         elementsToHide.forEach((el) => (el.style.display = "none"));
@@ -884,15 +908,73 @@
               pdfImgWidth,
               pdfImgHeight
             );
-            pdf.save("products.pdf");
+
+            // Convert PDF to Blob
+            const pdfBlob = pdf.output("blob");
+
+            // Convert image data URL to Blob
+            const imageBlob = dataURLtoBlob(dataUrl);
+
+            // Prepare FormData
+            const formData = new FormData();
+            formData.append("pdf", pdfBlob, `template-${Date.now()}.pdf`);
+            formData.append("image", imageBlob, `template-${Date.now()}.png`);
+            formData.append("template_size", templateSize);
+            formData.append("grid_layout", JSON.stringify(selectedLayout));
+            formData.append("background_color", backgroundColor);
+            formData.append("date_properties", JSON.stringify(dateProperties));
+            formData.append(
+              "custom_text_properties",
+              JSON.stringify(customTextProperties)
+            );
+            formData.append(
+              "products",
+              JSON.stringify(Object.values(selectedProducts))
+            );
+
+            // Send to API
+            $.ajax({
+              url: "https://api.marketim.app/admin/templates",
+              type: "POST",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+              },
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                alert("Template saved successfully!");
+                console.log("Template saved:", response);
+              },
+              error: function (xhr) {
+                console.error("Error saving template:", xhr.responseText);
+                alert("Failed to save template. Please try again.");
+              },
+              complete: () => {
+                elementsToHide.forEach((e) => (e.style.display = ""));
+                node.style.width = "";
+              },
+            });
           })
           .catch(function (error) {
             console.error("DOM-to-image error:", error);
-          })
-          .finally(() => {
+            alert("Error generating template. Please try again.");
             elementsToHide.forEach((e) => (e.style.display = ""));
             node.style.width = "";
           });
+      }
+
+      // Helper function to convert data URL to Blob
+      function dataURLtoBlob(dataUrl) {
+        const arr = dataUrl.split(",");
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], { type: mime });
       }
 
       $(document).ready(function () {

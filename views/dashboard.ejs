@@ -7,41 +7,85 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="../public/style/dashboard.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body class="min-h-screen bg-gray-100 flex flex-col">
+  <body class="min-h-screen bg-gray-50 font-inter flex flex-col">
     <!-- Navbar -->
-    <nav class="bg-white shadow-md p-4 flex justify-between items-center">
-      <div class="flex items-center gap-2">
-        <img
-          id="companyLogo"
-          src="../public/images/dummy2.jpg"
-          alt="Company Logo"
-          class="h-10 w-10 rounded-full object-cover"
-        />
-        <h1 class="text-2xl font-bold text-gray-800">Marketim Dashboard</h1>
+    <nav class="bg-white shadow-lg p-4 sticky top-0 z-50">
+      <div class="container mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-4">
+          <img
+            id="companyLogo"
+            src="../public/images/dummy2.jpg"
+            alt="Company Logo"
+            class="h-12 w-12 rounded-full object-cover ring-2 ring-blue-200"
+          />
+          <h1 class="text-2xl font-bold text-gray-900">Marketim Dashboard</h1>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="relative group">
+            <button
+              class="px-4 py-2 text-gray-700 font-medium hover:text-blue-600 focus:outline-none"
+            >
+              Menu
+              <svg
+                class="w-5 h-5 inline-block ml-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            <div
+              class="absolute hidden group-hover:block bg-white shadow-lg rounded-lg mt-2 w-48 right-0"
+            >
+              <a
+                href="/select-template.html"
+                class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+              >
+                Select Template
+              </a>
+              <a
+                href="/create-template.html"
+                class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+              >
+                Create Template
+              </a>
+            </div>
+          </div>
+          <button
+            onclick="logout()"
+            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
       </div>
-      <button
-        onclick="logout()"
-        class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-      >
-        Logout
-      </button>
     </nav>
 
     <!-- Main Content -->
     <div class="container mx-auto p-6 flex-1">
       <!-- KPI Boxes -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <!-- KPI 1: Total Products -->
         <div
-          class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg flex items-center justify-between"
+          class="kpi-box bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg flex items-center justify-between transform hover:scale-105 transition-transform duration-200"
         >
           <div>
             <h3 class="text-lg font-semibold">Total Products</h3>
-            <p id="totalProducts" class="text-3xl font-bold">0</p>
+            <p id="totalProducts" class="text-4xl font-bold">0</p>
           </div>
           <svg
-            class="w-12 h-12"
+            class="w-14 h-14 opacity-80"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -57,14 +101,14 @@
         </div>
         <!-- KPI 2: Total Templates -->
         <div
-          class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg shadow-lg flex items-center justify-between"
+          class="kpi-box bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg flex items-center justify-between transform hover:scale-105 transition-transform duration-200"
         >
           <div>
             <h3 class="text-lg font-semibold">Total Templates</h3>
-            <p id="totalTemplates" class="text-3xl font-bold">0</p>
+            <p id="totalTemplates" class="text-4xl font-bold">0</p>
           </div>
           <svg
-            class="w-12 h-12"
+            class="w-14 h-14 opacity-80"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -78,96 +122,105 @@
             ></path>
           </svg>
         </div>
-        <!-- KPI 3: Total Revenue -->
-        <div
-          class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg shadow-lg flex items-center justify-between"
-        >
-          <div>
-            <h3 class="text-lg font-semibold">Total Revenue</h3>
-            <p id="totalRevenue" class="text-3xl font-bold">€0.00</p>
-          </div>
-          <svg
-            class="w-12 h-12"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
-        </div>
       </div>
 
-      <!-- Profile and Table Section -->
+      <!-- Profile and Tables Section -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Profile Details -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-          <h2 class="text-xl font-semibold mb-4">Profile Details</h2>
+        <div
+          class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-200"
+        >
+          <div
+            class="bg-cover bg-center h-24 rounded-t-xl -m-6 mb-4"
+            id="coverImage"
+          ></div>
+          <!-- <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            Profile Details
+          </h2> -->
           <div class="flex items-center gap-4 mb-4">
             <img
               id="profileLogo"
               src="../public/images/dummy2.jpg"
               alt="Profile Logo"
-              class="h-16 w-16 rounded-full object-cover"
+              class="h-16 w-16 rounded-full object-cover ring-2 ring-blue-200"
             />
             <div>
-              <h3 id="profileName" class="text-lg font-medium">Loading...</h3>
+              <h3 id="profileName" class="text-lg font-medium text-gray-900">
+                Loading...
+              </h3>
               <p id="profileEmail" class="text-gray-600">Loading...</p>
             </div>
           </div>
-          <div class="space-y-2">
+          <div class="space-y-2 text-gray-700">
             <p>
               <strong>Company:</strong> <span id="companyName">Loading...</span>
             </p>
             <p>
-              <strong>Location:</strong>
-              <span id="companyLocation">Loading...</span>
+              <strong>Address:</strong>
+              <span id="companyAddress">Loading...</span>
+            </p>
+            <p>
+              <strong>Transaction ID:</strong>
+              <span id="companyTxn">Loading...</span>
+            </p>
+            <p>
+              <strong>Status:</strong>
+              <span
+                id="status"
+                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+              ></span>
+            </p>
+
+            <p>
+              <strong>Email Verified:</strong>
+              <span
+                id="emailVerified"
+                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+              ></span>
             </p>
             <p>
               <strong>Member Since:</strong>
               <span id="memberSince">Loading...</span>
             </p>
+            <p>
+              <strong>Last Updated:</strong>
+              <span id="updatedAt">Loading...</span>
+            </p>
           </div>
         </div>
 
         <!-- Products Table -->
-        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
-          <h2 class="text-xl font-semibold mb-4">Recent Products</h2>
+        <div
+          class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-200"
+        >
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            Recent Products
+          </h2>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
                   <th
-                    scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Image
                   </th>
                   <th
-                    scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Name (TR)
                   </th>
                   <th
-                    scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Name (DE)
                   </th>
                   <th
-                    scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Price
                   </th>
                   <th
-                    scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Status
@@ -177,11 +230,71 @@
               <tbody
                 id="productsTableBody"
                 class="bg-white divide-y divide-gray-200"
-              >
-                <!-- Table rows will be populated dynamically -->
-              </tbody>
+              ></tbody>
             </table>
           </div>
+          <!-- Pagination -->
+          <div class="mt-4 flex justify-between items-center">
+            <button
+              id="prevPage"
+              class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-300 hover:bg-blue-600 transition-colors"
+              disabled
+            >
+              Previous
+            </button>
+            <span class="text-gray-700 font-medium"
+              >Page <span id="currentPage">1</span> of
+              <span id="totalPages">1</span></span
+            >
+            <button
+              id="nextPage"
+              class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-300 hover:bg-blue-600 transition-colors"
+              disabled
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Templates Table -->
+      <div
+        class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-200 mt-6"
+      >
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+          Saved Templates
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Preview
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Template Size
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Created At
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              id="templatesTableBody"
+              class="bg-white divide-y divide-gray-200"
+            ></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -189,6 +302,8 @@
     <script>
       // Initialize data
       let products = [];
+      let currentPage = 1;
+      const productsPerPage = 5;
 
       // Fetch user profile
       function fetchUserProfile() {
@@ -214,12 +329,31 @@
               logo: user.companyLogo
                 ? `${proxyUrl}${baseUrl}${user.companyLogo}`
                 : "../public/images/dummy2.jpg",
+              coverImage: user.coverImage
+                ? `${proxyUrl}${baseUrl}${user.coverImage}`
+                : "../public/images/dummy3.jpg",
               name: user.name || "Unknown User",
               email: user.email || "N/A",
               company: user.companyName || "N/A",
-              location: user.location || "N/A",
+              address: user.companyAddress
+                ? `${user.companyAddress.street}, ${user.companyAddress.city}, ${user.companyAddress.postcode}`
+                : "N/A",
+              companyTxn: user.companyTxn || "N/A",
+              role: user.role || "N/A",
+              status: user.status || "N/A",
+              emailVerified:
+                user.emailVerified !== undefined
+                  ? user.emailVerified.toString()
+                  : "N/A",
               memberSince: user.createdAt
                 ? new Date(user.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "N/A",
+              updatedAt: user.updatedAt
+                ? new Date(user.updatedAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -246,10 +380,33 @@
           profile.email || "N/A";
         document.getElementById("companyName").textContent =
           profile.company || "N/A";
-        document.getElementById("companyLocation").textContent =
-          profile.location || "N/A";
+        document.getElementById("companyAddress").textContent =
+          profile.address || "N/A";
+        document.getElementById("companyTxn").textContent =
+          profile.companyTxn || "N/A";
+        // document.getElementById("role").textContent = profile.role || "N/A";
+        const statusSpan = document.getElementById("status");
+        statusSpan.textContent = profile.status || "N/A";
+        statusSpan.className = `px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+          profile.status === "active"
+            ? "bg-green-100 text-green-800"
+            : "bg-red-100 text-red-800"
+        }`;
+
+        const emailVerifiedSpan = document.getElementById("emailVerified");
+        emailVerifiedSpan.textContent = profile.emailVerified || "N/A";
+        emailVerifiedSpan.className = `px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+          profile.emailVerified === "true"
+            ? "bg-green-100 text-green-800"
+            : "bg-red-100 text-red-800"
+        }`;
         document.getElementById("memberSince").textContent =
           profile.memberSince || "N/A";
+        document.getElementById("updatedAt").textContent =
+          profile.updatedAt || "N/A";
+        document.getElementById("coverImage").style.backgroundImage = `url(${
+          profile.coverImage || "../public/images/dummy3.jpg"
+        })`;
       }
 
       // Fetch products and update KPIs
@@ -258,6 +415,7 @@
         if (!authToken) {
           console.error("No authToken found. Please log in.");
           updateProductsUI([]);
+          updateKPIs([]);
           return;
         }
 
@@ -283,26 +441,33 @@
             }));
             updateProductsUI(products);
             updateKPIs(products);
+            updatePagination();
           },
           error: function (xhr) {
             console.error("Error fetching products:", xhr.responseText);
             updateProductsUI([]);
             updateKPIs([]);
+            updatePagination();
           },
         });
       }
 
-      // Update products table
+      // Update products table with pagination
       function updateProductsUI(products) {
         const tableBody = document.getElementById("productsTableBody");
         tableBody.innerHTML = "";
-        products.slice(0, 5).forEach((product) => {
+        const start = (currentPage - 1) * productsPerPage;
+        const end = start + productsPerPage;
+        const paginatedProducts = products.slice(start, end);
+
+        paginatedProducts.forEach((product) => {
           const row = document.createElement("tr");
+          row.className = "hover:bg-gray-50 transition-colors";
           row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap">
               <img src="${product.image}" alt="${
             product.nameTr
-          }" class="h-10 w-10 object-cover rounded" />
+          }" class="h-10 w-10 object-cover rounded-full ring-1 ring-gray-200" />
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
               product.nameTr
@@ -327,22 +492,100 @@
         });
       }
 
+      // Update pagination controls
+      function updatePagination() {
+        const totalPages = Math.ceil(products.length / productsPerPage);
+        document.getElementById("currentPage").textContent = currentPage;
+        document.getElementById("totalPages").textContent = totalPages;
+
+        const prevButton = document.getElementById("prevPage");
+        const nextButton = document.getElementById("nextPage");
+
+        prevButton.disabled = currentPage === 1;
+        nextButton.disabled = currentPage === totalPages;
+
+        prevButton.onclick = () => {
+          if (currentPage > 1) {
+            currentPage--;
+            updateProductsUI(products);
+            updatePagination();
+          }
+        };
+
+        nextButton.onclick = () => {
+          if (currentPage < totalPages) {
+            currentPage++;
+            updateProductsUI(products);
+            updatePagination();
+          }
+        };
+      }
+
       // Update KPI boxes
-      function updateKPIs(products) {
+      function updateKPIs(products, templates = []) {
         // KPI 1: Total Products
         document.getElementById("totalProducts").textContent = products.length;
 
-        // KPI 2: Total Templates (Placeholder, as API not provided)
-        document.getElementById("totalTemplates").textContent = "10"; // Replace with actual data if available
+        // KPI 2: Total Templates
+        document.getElementById("totalTemplates").textContent =
+          templates.length;
+      }
 
-        // KPI 3: Total Revenue (Placeholder, as API not provided)
-        const totalRevenue = products.reduce(
-          (sum, product) => sum + product.price,
-          0
-        );
-        document.getElementById(
-          "totalRevenue"
-        ).textContent = `€${totalRevenue.toFixed(2)}`;
+      // Fetch templates
+      function fetchTemplates() {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+          console.error("No authToken found. Please log in.");
+          updateTemplatesUI([]);
+          updateKPIs(products, []);
+          return;
+        }
+
+        $.ajax({
+          url: "https://api.marketim.app/app/templates",
+          type: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          success: function (response) {
+            updateTemplatesUI(response);
+            updateKPIs(products, response);
+          },
+          error: function (xhr) {
+            console.error("Error fetching templates:", xhr.responseText);
+            updateTemplatesUI([]);
+            updateKPIs(products, []);
+          },
+        });
+      }
+
+      // Update templates table
+      function updateTemplatesUI(templates) {
+        const tableBody = document.getElementById("templatesTableBody");
+        tableBody.innerHTML = "";
+        templates.slice(0, 5).forEach((template) => {
+          const row = document.createElement("tr");
+          row.className = "hover:bg-gray-50 transition-colors";
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+              <img src="${
+                "https://api.marketim.app" + template.image_url
+              }" alt="Template Preview" class="h-10 w-10 object-cover rounded-full ring-1 ring-gray-200" />
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
+              template.template_size
+            } Products</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(
+              template.created_at
+            ).toLocaleDateString()}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <a href="${
+                "https://api.marketim.app" + template.pdf_url
+              }" target="_blank" class="text-blue-600 hover:underline">View PDF</a>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
       }
 
       // Logout function
@@ -355,6 +598,7 @@
       $(document).ready(function () {
         fetchUserProfile();
         fetchProducts();
+        fetchTemplates();
       });
     </script>
   </body>

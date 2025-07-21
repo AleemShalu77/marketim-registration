@@ -952,11 +952,17 @@
               processData: false,
               contentType: false,
               success: function (response) {
+                const toastDuration = 3000; // 3 seconds
                 Toastify({
                   text: "Template saved successfully!",
-                  duration: 3000,
+                  duration: toastDuration,
                   backgroundColor: "#10b981",
                 }).showToast();
+
+                // Redirect AFTER toast is hidden
+                setTimeout(() => {
+                  window.location.href = "/dashboard";
+                }, toastDuration);
               },
               error: function (xhr) {
                 Toastify({

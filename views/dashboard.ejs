@@ -11,6 +11,11 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   </head>
   <body class="min-h-screen bg-gray-50 font-inter flex flex-col">
     <!-- Navbar -->
@@ -34,7 +39,7 @@
           </a>
           <a
             href="/import-products"
-            class="px-4 py-2 text-gray-700 font-medium hover:text-blue-600"
+            class="px-4 font-medium text-gray-700 hover:text-blue-600"
           >
             Create Template
           </a>
@@ -58,7 +63,7 @@
         >
           <div>
             <h3 class="text-lg font-semibold">Total Products</h3>
-            <p id="totalProducts" class="text-4xl font-bold">0</p>
+            <p id="totalProducts" class="text-4xl font-semibold">0</p>
           </div>
           <svg
             class="w-14 h-14 opacity-80"
@@ -81,7 +86,7 @@
         >
           <div>
             <h3 class="text-lg font-semibold">Total Templates</h3>
-            <p id="totalTemplates" class="text-4xl font-bold">0</p>
+            <p id="totalTemplates" class="text-4xl font-semibold">0</p>
           </div>
           <svg
             class="w-14 h-14 opacity-80"
@@ -100,7 +105,7 @@
         </div>
       </div>
 
-      <!-- Profile and Tables Section -->
+      <!-- Profile and Templates Section -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Profile Details -->
         <div
@@ -110,9 +115,14 @@
             class="bg-cover bg-center h-24 rounded-t-xl -m-6 mb-4"
             id="coverImage"
           ></div>
-          <!-- <h2 class="text-xl font-semibold text-gray-900 mb-4">
-            Profile Details
-          </h2> -->
+          <div class="flex justify-between items-center mb-4">
+            <button
+              onclick="openEditProfileModal()"
+              class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+            >
+              Edit Profile
+            </button>
+          </div>
           <div class="flex items-center gap-4 mb-4">
             <img
               id="profileLogo"
@@ -146,7 +156,6 @@
                 class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
               ></span>
             </p>
-
             <p>
               <strong>Email Verified:</strong>
               <span
@@ -165,12 +174,12 @@
           </div>
         </div>
 
-        <!-- Products Table -->
+        <!-- Templates Table -->
         <div
           class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-200"
         >
           <h2 class="text-xl font-semibold text-gray-900 mb-4">
-            Recent Products
+            Saved Templates
           </h2>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -179,32 +188,27 @@
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Image
+                    Preview
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Name (TR)
+                    Template Size
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Name (DE)
+                    Created At
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Price
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Status
+                    Download
                   </th>
                 </tr>
               </thead>
               <tbody
-                id="productsTableBody"
+                id="templatesTableBody"
                 class="bg-white divide-y divide-gray-200"
               ></tbody>
             </table>
@@ -212,18 +216,18 @@
           <!-- Pagination -->
           <div class="mt-4 flex justify-between items-center">
             <button
-              id="prevPage"
+              id="prevTemplatePage"
               class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-300 hover:bg-blue-600 transition-colors"
               disabled
             >
               Previous
             </button>
-            <span class="text-gray-700 font-medium"
-              >Page <span id="currentPage">1</span> of
-              <span id="totalPages">1</span></span
-            >
+            <span class="text-gray-700 font-medium">
+              Page <span id="currentTemplatePage">1</span> of
+              <span id="totalTemplatePages">1</span>
+            </span>
             <button
-              id="nextPage"
+              id="nextTemplatePage"
               class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-300 hover:bg-blue-600 transition-colors"
               disabled
             >
@@ -232,54 +236,132 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Templates Table -->
-      <div
-        class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-200 mt-6"
-      >
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">
-          Saved Templates
-        </h2>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Preview
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Template Size
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Created At
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody
-              id="templatesTableBody"
-              class="bg-white divide-y divide-gray-200"
-            ></tbody>
-          </table>
-        </div>
+    <!-- Edit Profile Modal -->
+    <div
+      id="editProfileModal"
+      class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Edit Profile</h2>
+        <form
+          id="editProfileForm"
+          class="space-y-4"
+          enctype="multipart/form-data"
+        >
+          <div>
+            <label
+              for="editCompanyName"
+              class="block text-sm font-medium text-gray-700"
+              >Company Name</label
+            >
+            <input
+              type="text"
+              id="editCompanyName"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700"
+              for="edittaxNumber"
+              >Steuernummer</label
+            >
+            <input
+              type="text"
+              name="taxNumber"
+              id="edittaxNumber"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label
+              for="editStreet"
+              class="block text-sm font-medium text-gray-700"
+              >Street</label
+            >
+            <input
+              type="text"
+              id="editStreet"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label
+              for="editCity"
+              class="block text-sm font-medium text-gray-700"
+              >City</label
+            >
+            <input
+              type="text"
+              id="editCity"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label
+              for="editPostcode"
+              class="block text-sm font-medium text-gray-700"
+              >Postcode</label
+            >
+            <input
+              type="text"
+              id="editPostcode"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label
+              for="editCompanyLogo"
+              class="block text-sm font-medium text-gray-700"
+              >Company Logo</label
+            >
+            <input
+              type="file"
+              id="editCompanyLogo"
+              accept="image/*"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+          <div>
+            <label
+              for="editCoverImage"
+              class="block text-sm font-medium text-gray-700"
+              >Cover Image</label
+            >
+            <input
+              type="file"
+              id="editCoverImage"
+              accept="image/*"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+          <div class="flex justify-end gap-2">
+            <button
+              type="button"
+              onclick="closeEditProfileModal()"
+              class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              id="saveProfileButton"
+              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Save
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
     <script>
       // Initialize data
-      let products = [];
-      let currentPage = 1;
-      const productsPerPage = 5;
+      let templates = [];
+      let currentTemplatePage = 1;
+      const templatesPerPage = 5;
 
       // Fetch user profile
       function fetchUserProfile() {
@@ -314,6 +396,9 @@
               address: user.companyAddress
                 ? `${user.companyAddress.street}, ${user.companyAddress.city}, ${user.companyAddress.postcode}`
                 : "N/A",
+              street: user.companyAddress?.street || "N/A",
+              city: user.companyAddress?.city || "N/A",
+              postcode: user.companyAddress?.postcode || "N/A",
               companyTxn: user.companyTxn || "N/A",
               role: user.role || "N/A",
               status: user.status || "N/A",
@@ -350,6 +435,9 @@
           profile.logo || "../public/images/dummy2.jpg";
         document.getElementById("profileLogo").src =
           profile.logo || "../public/images/dummy2.jpg";
+        document.getElementById("coverImage").style.backgroundImage = `url(${
+          profile.coverImage || "../public/images/dummy3.jpg"
+        })`;
         document.getElementById("profileName").textContent =
           profile.name || "Unknown User";
         document.getElementById("profileEmail").textContent =
@@ -360,7 +448,6 @@
           profile.address || "N/A";
         document.getElementById("companyTxn").textContent =
           profile.companyTxn || "N/A";
-        // document.getElementById("role").textContent = profile.role || "N/A";
         const statusSpan = document.getElementById("status");
         statusSpan.textContent = profile.status || "N/A";
         statusSpan.className = `px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -368,7 +455,6 @@
             ? "bg-green-100 text-green-800"
             : "bg-red-100 text-red-800"
         }`;
-
         const emailVerifiedSpan = document.getElementById("emailVerified");
         emailVerifiedSpan.textContent = profile.emailVerified || "N/A";
         emailVerifiedSpan.className = `px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -380,22 +466,162 @@
           profile.memberSince || "N/A";
         document.getElementById("updatedAt").textContent =
           profile.updatedAt || "N/A";
-        document.getElementById("coverImage").style.backgroundImage = `url(${
-          profile.coverImage || "../public/images/dummy3.jpg"
-        })`;
+
+        // Populate modal form with current profile data
+        document.getElementById("editCompanyName").value =
+          profile.company || "";
+        document.getElementById("edittaxNumber").value =
+          profile.companyTxn || "";
+        document.getElementById("editStreet").value = profile.street || "";
+        document.getElementById("editCity").value = profile.city || "";
+        document.getElementById("editPostcode").value = profile.postcode || "";
+        // Reset file inputs
+        document.getElementById("editCompanyLogo").value = "";
+        document.getElementById("editCoverImage").value = "";
       }
 
-      // Fetch products and update KPIs
-      function fetchProducts() {
-        const authToken = localStorage.getItem("authToken");
-        if (!authToken) {
-          console.error("No authToken found. Please log in.");
-          updateProductsUI([]);
-          updateKPIs([]);
+      // Open edit profile modal
+      function openEditProfileModal() {
+        document.getElementById("editProfileModal").classList.remove("hidden");
+      }
+
+      // Close edit profile modal
+      function closeEditProfileModal() {
+        document.getElementById("editProfileModal").classList.add("hidden");
+      }
+
+      // Upload images to /app/upload-company-images
+      function uploadImages(logoFile, coverFile, authToken, callback) {
+        if (!logoFile && !coverFile) {
+          callback(null, { companyLogo: null, coverImage: null });
           return;
         }
 
-        const proxyUrl = "https://marketim.de/proxy/image?url=";
+        const formData = new FormData();
+        if (logoFile) formData.append("companyLogo", logoFile);
+        if (coverFile) formData.append("coverImage", coverFile);
+
+        $.ajax({
+          url: "https://api.marketim.app/app/upload-company-images",
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          processData: false,
+          contentType: false,
+          data: formData,
+          success: function (response) {
+            callback(null, {
+              companyLogo: response.companyLogo || null,
+              coverImage: response.coverImage || null,
+            });
+          },
+          error: function (xhr) {
+            callback(
+              new Error("Failed to upload images: " + xhr.responseText),
+              null
+            );
+          },
+        });
+      }
+
+      // Handle profile update
+      $("#editProfileForm").on("submit", function (e) {
+        e.preventDefault();
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+          console.error("No authToken found. Please log in.");
+          Toastify({
+            text: "Please log in to update your profile.",
+            duration: 3000,
+            backgroundColor: "#ef4444",
+          }).showToast();
+          return;
+        }
+
+        const saveButton = document.getElementById("saveProfileButton");
+        saveButton.disabled = true;
+        saveButton.textContent = "Saving...";
+
+        const logoFile = document.getElementById("editCompanyLogo").files[0];
+        const coverFile = document.getElementById("editCoverImage").files[0];
+
+        // Step 1: Upload images if any
+        uploadImages(logoFile, coverFile, authToken, function (err, imageData) {
+          if (err) {
+            console.error(err);
+            Toastify({
+              text: "Failed to upload images. Please try again.",
+              duration: 3000,
+              backgroundColor: "#ef4444",
+            }).showToast();
+            saveButton.disabled = false;
+            saveButton.textContent = "Save";
+            return;
+          }
+
+          // Step 2: Update profile with text fields and image filenames
+          const updatedProfile = {
+            companyName: document.getElementById("editCompanyName").value,
+            companyTxn: document.getElementById("edittaxNumber").value,
+            street: document.getElementById("editStreet").value,
+            city: document.getElementById("editCity").value,
+            postcode: document.getElementById("editPostcode").value,
+          };
+
+          // Include image filenames only if new images were uploaded
+          if (imageData.companyLogo)
+            updatedProfile.companyLogo = imageData.companyLogo;
+          if (imageData.coverImage)
+            updatedProfile.coverImage = imageData.coverImage;
+
+          $.ajax({
+            url: "https://api.marketim.app/app/company-profile",
+            type: "POST",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+            data: JSON.stringify(updatedProfile),
+            contentType: "application/json",
+            success: function (response) {
+              closeEditProfileModal();
+              fetchUserProfile();
+              const toastDuration = 3000; // 3 seconds
+              Toastify({
+                text: "Profile updated successfully!",
+                duration: toastDuration,
+                backgroundColor: "#10b981",
+              }).showToast();
+
+              // Redirect AFTER toast is hidden
+              setTimeout(() => {
+                window.location.href = "/dashboard";
+              }, toastDuration);
+            },
+            error: function (xhr) {
+              console.error("Error updating profile:", xhr.responseText);
+              Toastify({
+                text: "Failed to update profile. Please try again.",
+                duration: 3000,
+                backgroundColor: "#ef4444",
+              }).showToast();
+            },
+            complete: function () {
+              saveButton.disabled = false;
+              saveButton.textContent = "Save";
+            },
+          });
+        });
+      });
+
+      // Fetch products count for KPI
+      function fetchProductsCount() {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+          console.error("No authToken found. Please log in.");
+          updateKPIs(0, templates.length);
+          return;
+        }
 
         $.ajax({
           url: "https://api.marketim.app/admin/products",
@@ -404,107 +630,13 @@
             Authorization: `Bearer ${authToken}`,
           },
           success: function (response) {
-            products = response.map((product) => ({
-              id: product._id,
-              nameTr: product.title.tr,
-              nameDe: product.title.de,
-              price: parseFloat(product.base_price.replace(",", ".")) || 0,
-              image:
-                product.images.length > 0
-                  ? `${proxyUrl}https://api.marketim.app/uploads/${product.images[0]}`
-                  : "../public/images/dummy3.jpg",
-              status: product.status || "Available",
-            }));
-            updateProductsUI(products);
-            updateKPIs(products);
-            updatePagination();
+            updateKPIs(response.length, templates.length);
           },
           error: function (xhr) {
-            console.error("Error fetching products:", xhr.responseText);
-            updateProductsUI([]);
-            updateKPIs([]);
-            updatePagination();
+            console.error("Error fetching products count:", xhr.responseText);
+            updateKPIs(0, templates.length);
           },
         });
-      }
-
-      // Update products table with pagination
-      function updateProductsUI(products) {
-        const tableBody = document.getElementById("productsTableBody");
-        tableBody.innerHTML = "";
-        const start = (currentPage - 1) * productsPerPage;
-        const end = start + productsPerPage;
-        const paginatedProducts = products.slice(start, end);
-
-        paginatedProducts.forEach((product) => {
-          const row = document.createElement("tr");
-          row.className = "hover:bg-gray-50 transition-colors";
-          row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">
-              <img src="${product.image}" alt="${
-            product.nameTr
-          }" class="h-10 w-10 object-cover rounded-full ring-1 ring-gray-200" />
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
-              product.nameTr
-            }</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
-              product.nameDe
-            }</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">€${product.price.toFixed(
-              2
-            )}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                product.status === "Available"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }">
-                ${product.status}
-              </span>
-            </td>
-          `;
-          tableBody.appendChild(row);
-        });
-      }
-
-      // Update pagination controls
-      function updatePagination() {
-        const totalPages = Math.ceil(products.length / productsPerPage);
-        document.getElementById("currentPage").textContent = currentPage;
-        document.getElementById("totalPages").textContent = totalPages;
-
-        const prevButton = document.getElementById("prevPage");
-        const nextButton = document.getElementById("nextPage");
-
-        prevButton.disabled = currentPage === 1;
-        nextButton.disabled = currentPage === totalPages;
-
-        prevButton.onclick = () => {
-          if (currentPage > 1) {
-            currentPage--;
-            updateProductsUI(products);
-            updatePagination();
-          }
-        };
-
-        nextButton.onclick = () => {
-          if (currentPage < totalPages) {
-            currentPage++;
-            updateProductsUI(products);
-            updatePagination();
-          }
-        };
-      }
-
-      // Update KPI boxes
-      function updateKPIs(products, templates = []) {
-        // KPI 1: Total Products
-        document.getElementById("totalProducts").textContent = products.length;
-
-        // KPI 2: Total Templates
-        document.getElementById("totalTemplates").textContent =
-          templates.length;
       }
 
       // Fetch templates
@@ -513,7 +645,7 @@
         if (!authToken) {
           console.error("No authToken found. Please log in.");
           updateTemplatesUI([]);
-          updateKPIs(products, []);
+          updateKPIs(0, 0);
           return;
         }
 
@@ -524,22 +656,38 @@
             Authorization: `Bearer ${authToken}`,
           },
           success: function (response) {
-            updateTemplatesUI(response);
-            updateKPIs(products, response);
+            templates = response.map((template) => ({
+              id: template._id,
+              image_url: template.image_url,
+              pdf_url: template.pdf_url,
+              template_size: template.template_size,
+              created_at: template.created_at,
+            }));
+            updateTemplatesUI(templates);
+            updateKPIs(
+              document.getElementById("totalProducts").textContent,
+              templates.length
+            );
+            updateTemplatePagination();
           },
           error: function (xhr) {
             console.error("Error fetching templates:", xhr.responseText);
             updateTemplatesUI([]);
-            updateKPIs(products, []);
+            updateKPIs(document.getElementById("totalProducts").textContent, 0);
+            updateTemplatePagination();
           },
         });
       }
 
-      // Update templates table
+      // Update templates table with pagination
       function updateTemplatesUI(templates) {
         const tableBody = document.getElementById("templatesTableBody");
         tableBody.innerHTML = "";
-        templates.slice(0, 5).forEach((template) => {
+        const start = (currentTemplatePage - 1) * templatesPerPage;
+        const end = start + templatesPerPage;
+        const paginatedTemplates = templates.slice(start, end);
+
+        paginatedTemplates.forEach((template) => {
           const row = document.createElement("tr");
           row.className = "hover:bg-gray-50 transition-colors";
           row.innerHTML = `
@@ -555,13 +703,60 @@
               template.created_at
             ).toLocaleDateString()}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <a href="${
+              <a target="_blank" href="${
+                "https://api.marketim.app" + template.image_url
+              }" download class="inline-block mr-2" title="Download Image">
+                <svg class="w-5 h-5 text-blue-600 hover:text-blue-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </a>
+              <a target="_blank" href="${
                 "https://api.marketim.app" + template.pdf_url
-              }" target="_blank" class="text-blue-600 hover:underline">View PDF</a>
+              }" download class="inline-block" title="Download PDF">
+                <svg class="w-5 h-5 text-blue-600 hover:text-blue-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </a>
             </td>
           `;
           tableBody.appendChild(row);
         });
+      }
+
+      // Update template pagination controls
+      function updateTemplatePagination() {
+        const totalPages = Math.ceil(templates.length / templatesPerPage);
+        document.getElementById("currentTemplatePage").textContent =
+          currentTemplatePage;
+        document.getElementById("totalTemplatePages").textContent = totalPages;
+
+        const prevButton = document.getElementById("prevTemplatePage");
+        const nextButton = document.getElementById("nextTemplatePage");
+
+        prevButton.disabled = currentTemplatePage === 1;
+        nextButton.disabled = currentTemplatePage === totalPages;
+
+        prevButton.onclick = () => {
+          if (currentTemplatePage > 1) {
+            currentTemplatePage--;
+            updateTemplatesUI(templates);
+            updateTemplatePagination();
+          }
+        };
+
+        nextButton.onclick = () => {
+          if (currentTemplatePage < totalPages) {
+            currentTemplatePage++;
+            updateTemplatesUI(templates);
+            updateTemplatePagination();
+          }
+        };
+      }
+
+      // Update KPI boxes
+      function updateKPIs(productsCount, templatesCount) {
+        document.getElementById("totalProducts").textContent = productsCount;
+        document.getElementById("totalTemplates").textContent = templatesCount;
       }
 
       // Logout function
@@ -573,7 +768,7 @@
       // Initialize dashboard
       $(document).ready(function () {
         fetchUserProfile();
-        fetchProducts();
+        fetchProductsCount();
         fetchTemplates();
       });
     </script>

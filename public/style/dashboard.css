@@ -51,9 +51,19 @@ table tbody tr {
   border-radius: 9999px;
 }
 
-/* Dropdown Menu */
-.group:hover .group-hover\:block {
-  display: block;
+/* Modal Styles */
+#editProfileModal {
+  transition: opacity 0.3s ease-in-out;
+}
+#editProfileModal:not(.hidden) {
+  opacity: 1;
+}
+#editProfileModal .bg-white {
+  transform: scale(1);
+  transition: transform 0.3s ease-in-out;
+}
+#editProfileModal.hidden .bg-white {
+  transform: scale(0.95);
 }
 
 /* Pagination Buttons */
@@ -81,5 +91,8 @@ button:disabled {
   }
   .profile-details span {
     text-align: left;
+  }
+  #editProfileModal .bg-white {
+    width: 90%;
   }
 }

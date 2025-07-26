@@ -154,7 +154,7 @@
 .product-box-wrapper {
   position: relative;
   cursor: move;
-  width: 300px; /* Fixed width */
+  width: 100%; /* Fixed width */
   height: 400px; /* Fixed height */
   border: 2px solid #0e0eb3; /* Matching your border color */
   border-radius: 12px; /* Softer corners */

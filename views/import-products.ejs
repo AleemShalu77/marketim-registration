@@ -24,7 +24,7 @@
           <select
             id="templateSelect"
             class="control-select"
-            onchange="updateGridLayoutOptions()"
+            oninput="updateGridLayoutOptions()"
           >
             <option value="1">1 Product</option>
             <option value="2">2 Products</option>
@@ -39,7 +39,7 @@
           <select
             id="gridLayoutSelect"
             class="control-select"
-            onchange="updateGridLayout()"
+            oninput="updateGridLayout()"
           >
             <!-- Options will be populated dynamically -->
           </select>
@@ -173,7 +173,7 @@
       </div>
     </div>
 
-    <!-- Product Selection Modal (unchanged) -->
+    <!-- Product Selection Modal -->
     <div
       id="productModal"
       class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
@@ -340,6 +340,7 @@
 
         const templateGrid = document.getElementById("templateGrid");
         templateGrid.innerHTML = "";
+        templateGrid.className = "grid gap-4 w-full";
 
         fetchUserProfile(function (companyLogo, coverImage) {
           // Header
@@ -496,19 +497,23 @@
           `;
           templateGrid.appendChild(customTextItem);
 
-          // Product Rows
+          // Product Rows with Dynamic Sizing
           let currentBoxNumber = 1;
-          selectedLayout.forEach((colsInRow) => {
-            if (colsInRow === 0) return;
+          selectedLayout.forEach((rowLayout) => {
+            if (!Array.isArray(rowLayout)) {
+              rowLayout = Array(rowLayout).fill(1);
+            }
+            const totalCols = rowLayout.reduce((sum, span) => sum + span, 0);
             const row = document.createElement("div");
-            row.className = `grid gap-4 w-full grid-cols-${colsInRow}`;
+            row.className = `grid-item grid gap-4 w-full grid-cols-${totalCols}`;
 
-            for (let i = 0; i < colsInRow; i++) {
+            rowLayout.forEach((colSpan) => {
               const boxNumber = currentBoxNumber;
               const box = document.createElement("div");
               box.className = "product-box-wrapper";
               box.setAttribute("data-box", boxNumber);
               box.setAttribute("draggable", "true");
+              box.style.gridColumn = `span ${colSpan}`; // Dynamic column span
 
               if (selectedProducts[boxNumber]) {
                 const p = selectedProducts[boxNumber];
@@ -550,12 +555,9 @@
 
               row.appendChild(box);
               currentBoxNumber++;
-            }
+            });
 
-            const gridItem = document.createElement("div");
-            gridItem.className = "grid-item";
-            gridItem.appendChild(row);
-            templateGrid.appendChild(gridItem);
+            templateGrid.appendChild(row);
           });
 
           addProductBoxDragListeners();
@@ -676,7 +678,7 @@
         if (!authToken) return null;
         try {
           const decoded = jwt_decode(authToken);
-          return decoded.id; // Assuming the JWT payload has a user_id field
+          return decoded.id; // Assuming the JWT payload has an id field
         } catch (error) {
           console.error("Error decoding JWT:", error);
           return null;
@@ -813,7 +815,7 @@
           }" class="w-12 h-12 object-cover rounded-md">
             <div class="flex-1 pl-4">
               <div class="text-sm font-medium">${product.nameTr}</div>
-              <div class="text-sm">€${product.newPrice.toFixed(2)}</div>
+              <div>€${product.newPrice.toFixed(2)}</div>
               <div class="text-xs text-gray-600 mt-1">${product.nameDe}</div>
               <div class="text-xs mt-1 text-green-600">Available</div>
             </div>

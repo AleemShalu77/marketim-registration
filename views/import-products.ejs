@@ -1035,6 +1035,17 @@
           return;
         }
 
+        // Check if all products are selected for the template
+        const selectedProductCount = Object.keys(selectedProducts).length;
+        if (selectedProductCount < templateSize) {
+          Toastify({
+            text: "Please select all products before submitting.",
+            duration: 3000,
+            backgroundColor: "#ef4444",
+          }).showToast();
+          return;
+        }
+
         // Hide sidebar and other elements
         const elementsToHide = document.querySelectorAll(
           "h2, .mb-6, button, .sidebar"
@@ -1171,7 +1182,6 @@
             node.style.marginLeft = "";
           });
       }
-
       // Helper function to convert data URL to Blob
       function dataURLtoBlob(dataUrl) {
         const arr = dataUrl.split(",");

@@ -60,6 +60,19 @@
             onchange="updateBackgroundColor()"
           />
         </div>
+        <div class="control-group">
+          <label for="paperSizeSelect" class="block text-sm font-medium mb-2"
+            >Paper Size:</label
+          >
+          <select
+            id="paperSizeSelect"
+            class="control-select w-full p-2 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          >
+            <option value="a4">A4 (210 x 297 mm)</option>
+            <option value="a3">A3 (297 x 420 mm)</option>
+            <option value="a2">A2 (420 x 594 mm)</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -1021,6 +1034,7 @@
           document.getElementById("templateSelect").value
         );
         const gridLayoutSelect = document.getElementById("gridLayoutSelect");
+        const paperSizeSelect = document.getElementById("paperSizeSelect");
         const selectedLayout = gridLayoutSelect.value
           ? gridLayoutSelect.value.split(",").map(Number)
           : gridLayouts[templateSize][0];
@@ -1046,6 +1060,16 @@
           return;
         }
 
+        // Define paper sizes in mm
+        const paperSizes = {
+          a4: { width: 210, height: 297 },
+          a3: { width: 297, height: 420 },
+          a2: { width: 420, height: 594 },
+        };
+        const selectedPaperSize = paperSizeSelect.value || "a4";
+        const { width: aWidth, height: aHeight } =
+          paperSizes[selectedPaperSize];
+
         // Hide sidebar and other elements
         const elementsToHide = document.querySelectorAll(
           "h2, .mb-6, button, .sidebar"
@@ -1053,35 +1077,33 @@
         elementsToHide.forEach((el) => (el.style.display = "none"));
 
         // Adjust templateGridContainer to account for sidebar removal
-        node.style.width = "794px";
+        node.style.width = `${aWidth * 3.779527559}px`; // Convert mm to px (1 mm = 3.779527559 px)
         node.style.marginLeft = "0";
 
         domtoimage
           .toPng(node, {
             bgcolor: backgroundColor,
-            width: 794,
+            width: aWidth * 3.779527559,
             quality: 1,
           })
           .then(function (dataUrl) {
             const pdf = new jsPDF({
               orientation: "portrait",
               unit: "mm",
-              format: "a4",
+              format: selectedPaperSize,
             });
 
-            const a4Width = 210;
-            const a4Height = 297;
             const imgProps = pdf.getImageProperties(dataUrl);
             const imgWidth = imgProps.width;
             const imgHeight = imgProps.height;
 
             pdf.setFillColor(backgroundColor);
-            pdf.rect(0, 0, a4Width, a4Height, "F");
+            pdf.rect(0, 0, aWidth, aHeight, "F");
 
             const margin = 10;
-            const maxWidth = a4Width - 2 * margin;
-            const maxHeightPx = a4Height - 2 * margin;
-            let pdfImgWidth = imgWidth * 0.264583;
+            const maxWidth = aWidth - 2 * margin;
+            const maxHeightPx = aHeight - 2 * margin;
+            let pdfImgWidth = imgWidth * 0.264583; // Convert px to mm (1 px = 0.264583 mm)
             let pdfImgHeight = imgHeight * 0.264583;
 
             const aspectRatio = imgWidth / imgHeight;
@@ -1094,7 +1116,7 @@
               pdfImgWidth = pdfImgHeight * aspectRatio;
             }
 
-            const xOffset = (a4Width - pdfImgWidth) / 2;
+            const xOffset = (aWidth - pdfImgWidth) / 2;
             const yOffset = margin;
 
             pdf.addImage(
@@ -1128,6 +1150,7 @@
               "products",
               JSON.stringify(Object.values(selectedProducts))
             );
+            formData.append("paper_size", selectedPaperSize);
 
             // Send to API
             $.ajax({

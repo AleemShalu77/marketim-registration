@@ -232,16 +232,7 @@
 
       // Store date properties at global scope
       let dateProperties = {
-        text: new Date()
-          .toLocaleString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-          })
-          .replace(/(\d+:\d+) (AM|PM)/, "$1 $2 IST"), // Adjusted for IST, current date: Monday, July 28, 2025, 03:23 PM IST
+        text: "Monday, July 28, 2025, 04:26 PM IST",
         color: "#ffffff",
         fontSize: "14",
         isEditing: false,
@@ -271,7 +262,7 @@
       function isDarkColor(hexColor) {
         const rgb = hexToRgb(hexColor);
         const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-        return luminance < 0.5; // Threshold for dark color
+        return luminance < 0.5;
       }
 
       // Convert hex to RGB
@@ -284,6 +275,127 @@
               b: parseInt(result[3], 16),
             }
           : { r: 0, g: 0, b: 0 };
+      }
+
+      // Initialize header and custom text sections
+      function initializeHeaderAndCustomText() {
+        const templateGrid = document.getElementById("templateGrid");
+        const bgColor =
+          templateGrid.style.getPropertyValue("--bg-color") || "#e0f7fa";
+
+        fetchUserProfile(function (companyLogo, coverImage) {
+          // Remove existing header and custom text to avoid duplicates
+          const existingHeader = templateGrid.querySelector(".header-wrapper");
+          const existingCustomText =
+            templateGrid.querySelector(".custom-text-item");
+          if (existingHeader) existingHeader.remove();
+          if (existingCustomText) existingCustomText.remove();
+
+          // Create header
+          const headerItem = document.createElement("div");
+          headerItem.className = "grid-item";
+          headerItem.innerHTML = `
+            <div class="header-wrapper">
+                <header class="bg-white w-full rounded-lg shadow-md relative h-60 overflow-hidden"
+                    style="background-image: url('${coverImage}'); background-size: cover; background-position: center;">
+                    <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+                    <div class="relative z-10 flex items-center justify-between h-full p-4">
+                        <div class="flex-shrink-0">
+                            <img src="${companyLogo}" alt="Logo" class="h-20 w-20 rounded-full object-cover" />
+                        </div>
+                        <div class="flex-shrink-0 text-right flex flex-col items-end gap-2">
+                            <!-- Date Display -->
+                            <div class="${
+                              dateProperties.isEditing ? "hidden" : ""
+                            } flex items-center gap-2">
+                                <p class="font-medium text-white" id="currentDate" style="color: ${
+                                  dateProperties.color
+                                }; font-size: ${dateProperties.fontSize}px;">
+                                    ${dateProperties.text}
+                                </p>
+                                <button onclick="toggleDateEditing()" class="text-white hover:text-gray-300 text-sm" title="Edit Date">✎</button>
+                            </div>
+                            <!-- Date Editing Controls -->
+                            <div class="${
+                              dateProperties.isEditing ? "" : "hidden"
+                            } flex flex-col items-end gap-2">
+                                <input type="text" id="currentDateInput" class="font-medium text-white bg-transparent border border-white rounded px-2 py-1 w-64 text-sm"
+                                    style="color: ${
+                                      dateProperties.color
+                                    }; font-size: ${
+            dateProperties.fontSize
+          }px;" value="${dateProperties.text}"
+                                    oninput="updateDateText(this.value)" />
+                                <div class="flex items-center gap-2">
+                                    <label class="text-sm font-medium text-white">Color:</label>
+                                    <input type="color" id="dateColorPicker" value="${
+                                      dateProperties.color
+                                    }" class="h-8 w-8 bg-transparent border-none"
+                                        onchange="updateDateColor(this.value)" />
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-sm font-medium text-white">Font Size (px):</label>
+                                    <input type="number" id="dateFontSize" value="${
+                                      dateProperties.fontSize
+                                    }" min="8" max="40"
+                                        class="w-16 bg-transparent border border-white rounded px-2 py-1 text-sm text-white"
+                                        onchange="updateDateFontSize(this.value)" />
+                                </div>
+                                <button onclick="saveDateChanges()" class="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            </div>
+        `;
+          templateGrid.prepend(headerItem); // Prepend to ensure header is at the top
+
+          // Create custom text
+          const customTextItem = document.createElement("div");
+          customTextItem.className =
+            "grid-item custom-text-item flex justify-center items-center py-2";
+          customTextItem.innerHTML = `
+            <div class="${
+              customTextProperties.isEditing ? "hidden" : ""
+            } flex items-center gap-2">
+                <p class="font-medium" id="customText" style="color: ${
+                  customTextProperties.color
+                }; font-size: ${customTextProperties.fontSize}px;">
+                    ${customTextProperties.text}
+                </p>
+                <button onclick="toggleCustomTextEditing()" class="custom-text-edit-btn text-white hover:text-gray-300 text-sm"
+                    title="Edit Custom Text" style="color: ${
+                      customTextProperties.color
+                    };">✎</button>
+            </div>
+            <div class="${
+              customTextProperties.isEditing ? "" : "hidden"
+            } flex flex-col items-center gap-2">
+                <input type="text" id="customTextInput" class="font-medium bg-transparent border border-white rounded px-2 py-1 w-64 text-sm"
+                    style="color: ${customTextProperties.color}; font-size: ${
+            customTextProperties.fontSize
+          }px;" value="${customTextProperties.text}"
+                    oninput="updateCustomText(this.value)" />
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-white">Color:</label>
+                    <input type="color" id="customTextColorPicker" value="${
+                      customTextProperties.color
+                    }" class="h-8 w-8 bg-transparent border-none"
+                        onchange="updateCustomTextColor(this.value)" />
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-white">Font Size (px):</label>
+                    <input type="number" id="customTextFontSize" value="${
+                      customTextProperties.fontSize
+                    }" min="8" max="40"
+                        class="w-16 bg-transparent border border-gray-300 rounded px-2 py-1 text-sm text-white"
+                        onchange="updateCustomTextFontSize(this.value)" />
+                </div>
+                <button onclick="saveCustomTextChanges()" class="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm">Save</button>
+            </div>
+        `;
+          templateGrid.insertBefore(customTextItem, headerItem.nextSibling); // Insert after header
+        });
       }
 
       // Function to fetch products from API
@@ -322,15 +434,16 @@
               bgColor: "#ffffff",
               borderColor: "#e5e7eb",
             }));
-            updateBackgroundColor(); // Call updateBackgroundColor to set initial background and trigger grid update
+            updateBackgroundColor();
           },
           error: function (xhr) {
             console.error("Error fetching products:", xhr.responseText);
             products = [];
-            updateBackgroundColor(); // Still update the grid with default background even if products fail to load
+            updateGridLayout();
           },
         });
       }
+
       function setTemplateFromQueryParam() {
         const urlParams = new URLSearchParams(window.location.search);
         const templateParam = urlParams.get("template");
@@ -358,6 +471,13 @@
           gridLayoutSelect.appendChild(option);
         });
 
+        // Clear only product rows, keep header and custom text
+        const templateGrid = document.getElementById("templateGrid");
+        const productRows = templateGrid.querySelectorAll(".grid-item.grid");
+        productRows.forEach((row) => row.remove());
+
+        // Reinitialize header and custom text to ensure they're at the top
+        initializeHeaderAndCustomText();
         updateGridLayout();
       }
 
@@ -378,13 +498,9 @@
         // Update custom text and pencil color based on background color
         const isDarkBg = isDarkColor(selectedColor);
         customTextProperties.color = isDarkBg ? "#ffffff" : "#000000";
-        document.querySelectorAll(".custom-text-edit-btn").forEach((btn) => {
-          btn.style.color = customTextProperties.color;
-        });
-
-        // Update custom text and date display if they exist
         const customText = document.getElementById("customText");
         const customTextInput = document.getElementById("customTextInput");
+        const editButtons = document.querySelectorAll(".custom-text-edit-btn");
         if (customText) {
           customText.style.color = customTextProperties.color;
           customText.style.fontSize = `${customTextProperties.fontSize}px`;
@@ -393,7 +509,11 @@
           customTextInput.style.color = customTextProperties.color;
           customTextInput.style.fontSize = `${customTextProperties.fontSize}px`;
         }
+        editButtons.forEach((btn) => {
+          btn.style.color = customTextProperties.color;
+        });
 
+        // Update date color
         const currentDate = document.getElementById("currentDate");
         const currentDateInput = document.getElementById("currentDateInput");
         if (currentDate) {
@@ -405,7 +525,7 @@
           currentDateInput.style.fontSize = `${dateProperties.fontSize}px`;
         }
 
-        // Only call updateGridLayout if products are already loaded
+        // Only update product grid if products are loaded
         if (
           Object.keys(selectedProducts).length > 0 ||
           templateGrid.querySelector(".product-box-wrapper")
@@ -413,6 +533,7 @@
           updateGridLayout();
         }
       }
+
       function updateGridLayout() {
         const templateSize = parseInt(
           document.getElementById("templateSelect").value
@@ -435,278 +556,238 @@
           templateGrid.style.getPropertyValue("--bg-color") || "#e0f7fa";
         const isDarkBg = isDarkColor(bgColor);
 
-        // Only clear product rows, not the entire grid
-        const existingHeader = templateGrid.querySelector(".header-wrapper");
-        const existingCustomText =
-          templateGrid.querySelector(".custom-text-item");
+        // Clear only product rows
         const productRows = templateGrid.querySelectorAll(".grid-item.grid");
         productRows.forEach((row) => row.remove());
 
-        fetchUserProfile(function (companyLogo, coverImage) {
-          // Add header only if it doesn't exist
-          if (!existingHeader) {
-            const headerItem = document.createElement("div");
-            headerItem.className = "grid-item";
-            headerItem.innerHTML = `
-                <div class="header-wrapper">
-                    <header class="bg-white w-full rounded-lg shadow-md relative h-60 overflow-hidden"
-                        style="background-image: url('${coverImage}'); background-size: cover; background-position: center;">
-                        <div class="absolute inset-0 bg-black bg-opacity-40"></div>
-                        <div class="relative z-10 flex items-center justify-between h-full p-4">
-                            <div class="flex-shrink-0">
-                                <img src="${companyLogo}" alt="Logo" class="h-20 w-20 rounded-full object-cover" />
-                            </div>
-                            <div class="flex-shrink-0 text-right flex flex-col items-end gap-2">
-                                <!-- Date Display -->
-                                <div class="${
-                                  dateProperties.isEditing ? "hidden" : ""
-                                } flex items-center gap-2">
-                                    <p class="font-medium text-white" id="currentDate" style="color: ${
-                                      dateProperties.color
-                                    }; font-size: ${
-              dateProperties.fontSize
-            }px;">
-                                        ${dateProperties.text}
-                                    </p>
-                                    <button onclick="toggleDateEditing()" class="text-white hover:text-gray-300 text-sm" title="Edit Date">✎</button>
-                                </div>
-                                <!-- Date Editing Controls -->
-                                <div class="${
-                                  dateProperties.isEditing ? "" : "hidden"
-                                } flex flex-col items-end gap-2">
-                                    <input type="text" id="currentDateInput" class="font-medium text-white bg-transparent border border-white rounded px-2 py-1 w-64 text-sm"
-                                        style="color: ${
-                                          dateProperties.color
-                                        }; font-size: ${
-              dateProperties.fontSize
-            }px;" value="${dateProperties.text}"
-                                        oninput="updateDateText(this.value)" />
-                                    <div class="flex items-center gap-2">
-                                        <label class="text-sm font-medium text-white">Color:</label>
-                                        <input type="color" id="dateColorPicker" value="${
-                                          dateProperties.color
-                                        }" class="h-8 w-8 bg-transparent border-none"
-                                            onchange="updateDateColor(this.value)" />
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <label class="text-sm font-medium text-white">Font Size (px):</label>
-                                        <input type="number" id="dateFontSize" value="${
-                                          dateProperties.fontSize
-                                        }" min="8" max="40"
-                                            class="w-16 bg-transparent border border-white rounded px-2 py-1 text-sm text-white"
-                                            onchange="updateDateFontSize(this.value)" />
-                                    </div>
-                                    <button onclick="saveDateChanges()" class="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm">Save</button>
-                                </div>
-                            </div>
+        // Update product rows
+        let currentBoxNumber = 1;
+        selectedLayout.forEach((rowLayout) => {
+          if (!Array.isArray(rowLayout)) {
+            rowLayout = Array(rowLayout).fill(1);
+          }
+          const totalCols = rowLayout.reduce((sum, span) => sum + span, 0);
+          const row = document.createElement("div");
+          row.className = `grid-item grid gap-4 w-full grid-cols-${totalCols}`;
+
+          rowLayout.forEach((colSpan) => {
+            const boxNumber = currentBoxNumber++;
+            const box = document.createElement("div");
+            box.className = "product-box-wrapper";
+            box.setAttribute("data-box", boxNumber);
+            box.setAttribute("draggable", "true");
+            box.style.gridColumn = `span ${colSpan}`;
+
+            const defaultBgColor = isDarkBg ? "#ffffff" : "#f9fafb";
+            const defaultBorderColor = isDarkBg ? "#e5e7eb" : "#d1d5db";
+
+            if (selectedProducts[boxNumber]) {
+              const p = selectedProducts[boxNumber];
+              box.innerHTML = `
+                    <div class="label-container" style="background-color: ${
+                      p.bgColor || defaultBgColor
+                    }; border: 2px solid ${
+                p.borderColor || defaultBorderColor
+              };">
+                        <img src="${
+                          p.logo
+                        }" alt="Produkt Logo" class="product-logo" />
+                        <div class="product-names">
+                            <div class="german-name">${p.nameDe}</div>
+                            <div class="turkish-name">${p.nameTr}</div>
                         </div>
-                    </header>
-                </div>
-            `;
-            templateGrid.appendChild(headerItem);
-          }
-
-          // Add custom text only if it doesn't exist
-          if (!existingCustomText) {
-            const customTextItem = document.createElement("div");
-            customTextItem.className =
-              "grid-item custom-text-item flex justify-center items-center py-2";
-            customTextItem.innerHTML = `
-                <div class="${
-                  customTextProperties.isEditing ? "hidden" : ""
-                } flex items-center gap-2">
-                    <p class="font-medium" id="customText" style="color: ${
-                      customTextProperties.color
-                    }; font-size: ${customTextProperties.fontSize}px;">
-                        ${customTextProperties.text}
-                    </p>
-                    <button onclick="toggleCustomTextEditing()" class="custom-text-edit-btn text-white hover:text-gray-300 text-sm"
-                        title="Edit Custom Text" style="color: ${
-                          customTextProperties.color
-                        };">✎</button>
-                </div>
-                <div class="${
-                  customTextProperties.isEditing ? "" : "hidden"
-                } flex flex-col items-center gap-2">
-                    <input type="text" id="customTextInput" class="font-medium bg-transparent border border-gray-300 rounded px-2 py-1 w-64 text-sm"
-                        style="color: ${
-                          customTextProperties.color
-                        }; font-size: ${
-              customTextProperties.fontSize
-            }px;" value="${customTextProperties.text}"
-                        oninput="updateCustomText(this.value)" />
-                    <div class="flex items-center gap-2">
-                        <label class="text-sm font-medium text-white">Color:</label>
-                        <input type="color" id="customTextColorPicker" value="${
-                          customTextProperties.color
-                        }" class="h-8 w-8 bg-transparent border-none"
-                            onchange="updateCustomTextColor(this.value)" />
+                        ${
+                          p.isHalal
+                            ? `<img src="./public/images/halal.png" alt="HALAL Logo" class="halal-logo" />`
+                            : ""
+                        }
+                        <div class="unit-price">${p.unitPrice}</div>
+                        <div class="savings-ribbon">SIE SPAREN</div>
+                        <div class="savings-amount">${p.saving}</div>
+                        <img src="${
+                          p.image
+                        }" alt="Produktfoto" class="product-image" />
+                        <div class="pack-size">${p.packageSize}</div>
+                        <div class="prices">
+                            <div class="old-price">€${p.oldPrice.toFixed(
+                              2
+                            )}</div>
+                            <div class="new-price">€${p.newPrice.toFixed(
+                              2
+                            )}</div>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <label class="text-sm font-medium text-white">Font Size (px):</label>
-                        <input type="number" id="customTextFontSize" value="${
-                          customTextProperties.fontSize
-                        }" min="8" max="40"
-                            class="w-16 bg-transparent border border-gray-300 rounded px-2 py-1 text-sm text-white"
-                            onchange="updateCustomTextFontSize(this.value)" />
-                    </div>
-                    <button onclick="saveCustomTextChanges()" class="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm">Save</button>
-                </div>
-            `;
-            templateGrid.appendChild(customTextItem);
-          }
-
-          // Update product rows
-          let currentBoxNumber = 1;
-          selectedLayout.forEach((rowLayout) => {
-            if (!Array.isArray(rowLayout)) {
-              rowLayout = Array(rowLayout).fill(1);
+                    <button onclick="editProduct(${boxNumber}); event.stopPropagation();" class="absolute top-2 right-2 action-btn edit-btn" title="Edit">✎</button>
+                `;
+            } else {
+              box.innerHTML = `
+                    <div class="product-box" style="background-color: ${defaultBgColor}; border: 2px solid ${defaultBorderColor};">
+                        <div class="product-box-icon">📦</div>
+                        <div class="product-box-text">Select Product ${boxNumber}</div>
+                    </div>`;
             }
-            const totalCols = rowLayout.reduce((sum, span) => sum + span, 0);
-            const row = document.createElement("div");
-            row.className = `grid-item grid gap-4 w-full grid-cols-${totalCols}`;
 
-            rowLayout.forEach((colSpan) => {
-              const boxNumber = currentBoxNumber;
-              const box = document.createElement("div");
-              box.className = "product-box-wrapper";
-              box.setAttribute("data-box", boxNumber);
-              box.setAttribute("draggable", "true");
-              box.style.gridColumn = `span ${colSpan}`;
-
-              const defaultBgColor = isDarkBg ? "#ffffff" : "#f9fafb";
-              const defaultBorderColor = isDarkBg ? "#e5e7eb" : "#d1d5db";
-
-              if (selectedProducts[boxNumber]) {
-                const p = selectedProducts[boxNumber];
-                box.innerHTML = `
-                        <div class="label-container" style="background-color: ${
-                          p.bgColor || defaultBgColor
-                        }; border: 2px solid ${
-                  p.borderColor || defaultBorderColor
-                };">
-                            <img src="${
-                              p.logo
-                            }" alt="Produkt Logo" class="product-logo" />
-                            <div class="product-names">
-                                <div class="german-name">${p.nameDe}</div>
-                                <div class="turkish-name">${p.nameTr}</div>
-                            </div>
-                            ${
-                              p.isHalal
-                                ? `<img src="./public/images/halal.png" alt="HALAL Logo" class="halal-logo" />`
-                                : ""
-                            }
-                            <div class="unit-price">${p.unitPrice}</div>
-                            <div class="savings-ribbon">SIE SPAREN</div>
-                            <div class="savings-amount">${p.saving}</div>
-                            <img src="${
-                              p.image
-                            }" alt="Produktfoto" class="product-image" />
-                            <div class="pack-size">${p.packageSize}</div>
-                            <div class="prices">
-                                <div class="old-price">€${p.oldPrice.toFixed(
-                                  2
-                                )}</div>
-                                <div class="new-price">€${p.newPrice.toFixed(
-                                  2
-                                )}</div>
-                            </div>
-                        </div>
-                        <button onclick="editProduct(${boxNumber}); event.stopPropagation();" class="absolute top-2 right-2 action-btn edit-btn" title="Edit">✎</button>
-                    `;
-              } else {
-                box.innerHTML = `
-                        <div class="product-box" style="background-color: ${defaultBgColor}; border: 2px solid ${defaultBorderColor};">
-                            <div class="product-box-icon">📦</div>
-                            <div class="product-box-text">Select Product ${boxNumber}</div>
-                        </div>`;
-              }
-
-              row.appendChild(box);
-              currentBoxNumber++;
-            });
-
-            templateGrid.appendChild(row);
+            row.appendChild(box);
           });
 
-          addProductBoxDragListeners();
-          addClickListeners();
+          templateGrid.appendChild(row);
         });
+
+        addProductBoxDragListeners();
+        addClickListeners();
       }
 
       function toggleCustomTextEditing() {
         customTextProperties.isEditing = !customTextProperties.isEditing;
-        updateGridLayout();
+        const customTextContainer = document.querySelector(
+          ".custom-text-item > div:first-child"
+        );
+        const customTextEditContainer = document.querySelector(
+          ".custom-text-item > div:last-child"
+        );
+        if (customTextContainer && customTextEditContainer) {
+          customTextContainer.classList.toggle(
+            "hidden",
+            customTextProperties.isEditing
+          );
+          customTextEditContainer.classList.toggle(
+            "hidden",
+            !customTextProperties.isEditing
+          );
+        } else {
+          console.error("Custom text containers not found");
+        }
       }
 
       function updateCustomText(value) {
         customTextProperties.text = value;
-        const textInput = document.getElementById("customTextInput");
-        if (textInput) {
-          textInput.style.color = customTextProperties.color;
-          textInput.style.fontSize = `${customTextProperties.fontSize}px`;
+        const customText = document.getElementById("customText");
+        const customTextInput = document.getElementById("customTextInput");
+        if (customText) {
+          customText.textContent = value;
+        }
+        if (customTextInput) {
+          customTextInput.value = value;
+          customTextInput.style.color = customTextProperties.color;
+          customTextInput.style.fontSize = `${customTextProperties.fontSize}px`;
         }
       }
 
       function updateCustomTextColor(value) {
         customTextProperties.color = value;
-        const textInput = document.getElementById("customTextInput");
-        if (textInput) {
-          textInput.style.color = value;
+        const customText = document.getElementById("customText");
+        const customTextInput = document.getElementById("customTextInput");
+        const editButtons = document.querySelectorAll(".custom-text-edit-btn");
+        if (customText) {
+          customText.style.color = value;
         }
-        document.querySelectorAll(".custom-text-edit-btn").forEach((btn) => {
+        if (customTextInput) {
+          customTextInput.style.color = value;
+        }
+        editButtons.forEach((btn) => {
           btn.style.color = value;
         });
-        updateGridLayout(); // Refresh layout to apply new color
       }
 
       function updateCustomTextFontSize(value) {
         customTextProperties.fontSize = value;
-        const textInput = document.getElementById("customTextInput");
-        if (textInput) {
-          textInput.style.fontSize = `${value}px`;
+        const customText = document.getElementById("customText");
+        const customTextInput = document.getElementById("customTextInput");
+        if (customText) {
+          customText.style.fontSize = `${value}px`;
+        }
+        if (customTextInput) {
+          customTextInput.style.fontSize = `${value}px`;
         }
       }
 
       function saveCustomTextChanges() {
         customTextProperties.isEditing = false;
-        updateGridLayout();
+        const customTextContainer = document.querySelector(
+          ".custom-text-item > div:first-child"
+        );
+        const customTextEditContainer = document.querySelector(
+          ".custom-text-item > div:last-child"
+        );
+        if (customTextContainer && customTextEditContainer) {
+          customTextContainer.classList.remove("hidden");
+          customTextEditContainer.classList.add("hidden");
+        } else {
+          console.error("Custom text containers not found");
+        }
       }
 
       function toggleDateEditing() {
         dateProperties.isEditing = !dateProperties.isEditing;
-        updateGridLayout();
+        const dateContainer = document.querySelector(
+          ".header-wrapper > .relative > .flex-shrink-0.text-right > div:first-child"
+        );
+        const dateEditContainer = document.querySelector(
+          ".header-wrapper > .relative > .flex-shrink-0.text-right > div:last-child"
+        );
+        if (dateContainer && dateEditContainer) {
+          dateContainer.classList.toggle("hidden", dateProperties.isEditing);
+          dateEditContainer.classList.toggle(
+            "hidden",
+            !dateProperties.isEditing
+          );
+        } else {
+          console.error("Date containers not found");
+        }
       }
 
       function updateDateText(value) {
         dateProperties.text = value;
-        const dateInput = document.getElementById("currentDateInput");
-        if (dateInput) {
-          dateInput.style.color = dateProperties.color;
-          dateInput.style.fontSize = `${dateProperties.fontSize}px`;
+        const currentDate = document.getElementById("currentDate");
+        const currentDateInput = document.getElementById("currentDateInput");
+        if (currentDate) {
+          currentDate.textContent = value;
+        }
+        if (currentDateInput) {
+          currentDateInput.value = value;
+          currentDateInput.style.color = dateProperties.color;
+          currentDateInput.style.fontSize = `${dateProperties.fontSize}px`;
         }
       }
 
       function updateDateColor(value) {
         dateProperties.color = value;
-        const dateInput = document.getElementById("currentDateInput");
-        if (dateInput) {
-          dateInput.style.color = value;
+        const currentDate = document.getElementById("currentDate");
+        const currentDateInput = document.getElementById("currentDateInput");
+        if (currentDate) {
+          currentDate.style.color = value;
+        }
+        if (currentDateInput) {
+          currentDateInput.style.color = value;
         }
       }
 
       function updateDateFontSize(value) {
         dateProperties.fontSize = value;
-        const dateInput = document.getElementById("currentDateInput");
-        if (dateInput) {
-          dateInput.style.fontSize = `${value}px`;
+        const currentDate = document.getElementById("currentDate");
+        const currentDateInput = document.getElementById("currentDateInput");
+        if (currentDate) {
+          currentDate.style.fontSize = `${value}px`;
+        }
+        if (currentDateInput) {
+          currentDateInput.style.fontSize = `${value}px`;
         }
       }
 
       function saveDateChanges() {
         dateProperties.isEditing = false;
-        updateGridLayout();
+        const dateContainer = document.querySelector(
+          ".header-wrapper > .relative > .flex-shrink-0.text-right > div:first-child"
+        );
+        const dateEditContainer = document.querySelector(
+          ".header-wrapper > .relative > .flex-shrink-0.text-right > div:last-child"
+        );
+        if (dateContainer && dateEditContainer) {
+          dateContainer.classList.remove("hidden");
+          dateEditContainer.classList.add("hidden");
+        } else {
+          console.error("Date containers not found");
+        }
       }
 
       function fetchUserProfile(callback) {
@@ -752,7 +833,7 @@
         if (!authToken) return null;
         try {
           const decoded = jwt_decode(authToken);
-          return decoded.id; // Assuming the JWT payload has an id field
+          return decoded.id;
         } catch (error) {
           console.error("Error decoding JWT:", error);
           return null;
@@ -781,8 +862,7 @@
       }
 
       function handleBoxDragEnd(e) {
-        const box = e.currentTarget;
-        box.classList.remove("dragging");
+        e.currentTarget.classList.remove("dragging");
       }
 
       function handleBoxDragOver(e) {
@@ -895,12 +975,12 @@
             product.nameTr
           }" class="w-12 h-12 object-cover rounded-md">
             <div class="flex-1 pl-4">
-              <div class="text-sm font-medium">${product.nameTr}</div>
-              <div>€${product.newPrice.toFixed(2)}</div>
-              <div class="text-xs text-gray-600 mt-1">${product.nameDe}</div>
-              <div class="text-xs mt-1 text-green-600">Available</div>
+                <div class="text-sm font-medium">${product.nameTr}</div>
+                <div>€${product.newPrice.toFixed(2)}</div>
+                <div class="text-xs text-gray-600 mt-1">${product.nameDe}</div>
+                <div class="text-xs mt-1 text-green-600">Available</div>
             </div>
-          `;
+        `;
           li.onclick = () => selectProduct(product);
           productList.appendChild(li);
         });
@@ -947,7 +1027,6 @@
         }
 
         // Hide sidebar and other elements
-        const sidebar = document.querySelector(".sidebar");
         const elementsToHide = document.querySelectorAll(
           "h2, .mb-6, button, .sidebar"
         );
@@ -955,7 +1034,7 @@
 
         // Adjust templateGridContainer to account for sidebar removal
         node.style.width = "794px";
-        node.style.marginLeft = "0"; // Remove margin-left to center content
+        node.style.marginLeft = "0";
 
         domtoimage
           .toPng(node, {
@@ -1041,14 +1120,14 @@
               processData: false,
               contentType: false,
               success: function (response) {
-                const toastDuration = 3000; // 3 seconds
+                const toastDuration = 3000;
                 Toastify({
                   text: "Template saved successfully!",
                   duration: toastDuration,
                   backgroundColor: "#10b981",
                 }).showToast();
 
-                // Redirect AFTER toast is hidden
+                // Redirect after toast
                 setTimeout(() => {
                   window.location.href = "/dashboard";
                 }, toastDuration);
@@ -1061,9 +1140,9 @@
                 }).showToast();
               },
               complete: () => {
-                // Restore visibility of hidden elements
+                // Restore hidden elements
                 elementsToHide.forEach((e) => (e.style.display = ""));
-                // Restore original margin-left
+                // Restore styles
                 node.style.width = "";
                 node.style.marginLeft = "";
               },
@@ -1076,13 +1155,14 @@
               duration: 3000,
               backgroundColor: "#ef4444",
             }).showToast();
-            // Restore visibility of hidden elements on error
+            // Restore hidden elements on error
             elementsToHide.forEach((e) => (e.style.display = ""));
-            // Restore original margin-left
+            // Restore styles
             node.style.width = "";
             node.style.marginLeft = "";
           });
       }
+
       // Helper function to convert data URL to Blob
       function dataURLtoBlob(dataUrl) {
         const arr = dataUrl.split(",");
@@ -1098,8 +1178,8 @@
 
       $(document).ready(function () {
         setTemplateFromQueryParam();
+        initializeHeaderAndCustomText();
         fetchProducts();
-        // updateBackgroundColor();
       });
     </script>
   </body>

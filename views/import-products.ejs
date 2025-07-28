@@ -177,8 +177,7 @@
               >Old Price:</label
             >
             <input
-              type="number"
-              step="0.01"
+              type="text"
               class="editable-input w-full mt-1 p-2 border rounded"
               id="editOldPrice"
             />
@@ -188,8 +187,7 @@
               >New Price:</label
             >
             <input
-              type="number"
-              step="0.01"
+              type="text"
               class="editable-input w-full mt-1 p-2 border rounded"
               id="editNewPrice"
             />
@@ -474,7 +472,6 @@
           },
         });
       }
-
       function setTemplateFromQueryParam() {
         const urlParams = new URLSearchParams(window.location.search);
         const templateParam = urlParams.get("template");
@@ -640,12 +637,12 @@
                         }" alt="Produktfoto" class="product-image" />
                         <div class="pack-size">${p.packageSize}</div>
                         <div class="prices">
-                            <div class="old-price">€${p.oldPrice.toFixed(
-                              2
-                            )}</div>
-                            <div class="new-price">€${p.newPrice.toFixed(
-                              2
-                            )}</div>
+                            <div class="old-price">€${p.oldPrice
+                              .toFixed(2)
+                              .replace(".", ",")}</div>
+                            <div class="new-price">€${p.newPrice
+                              .toFixed(2)
+                              .replace(".", ",")}</div>
                         </div>
                     </div>
                     <button onclick="editProduct(${boxNumber}); event.stopPropagation();" class="absolute top-2 right-2 action-btn edit-btn" title="Edit">✎</button>
@@ -956,8 +953,12 @@
           document.getElementById("editSaving").value = product.saving;
           document.getElementById("editPackageSize").value =
             product.packageSize;
-          document.getElementById("editOldPrice").value = product.oldPrice;
-          document.getElementById("editNewPrice").value = product.newPrice;
+          document.getElementById("editOldPrice").value = product.oldPrice
+            .toFixed(2)
+            .replace(".", ",");
+          document.getElementById("editNewPrice").value = product.newPrice
+            .toFixed(2)
+            .replace(".", ",");
           document.getElementById("editBgColor").value =
             product.bgColor || "#ffffff";
           document.getElementById("editBorderColor").value =
@@ -993,7 +994,7 @@
         // Calculate savings as oldPrice - newPrice
         const savingsAmount = updatedProduct.oldPrice - updatedProduct.newPrice;
         updatedProduct.saving =
-          savingsAmount >= 0 ? `€${savingsAmount.toFixed(0)},-` : "0,-";
+          savingsAmount >= 0 ? `${savingsAmount.toFixed(0)},-` : "0,-";
 
         selectedProducts[boxNumber] = updatedProduct;
         closeEditModal();
@@ -1019,7 +1020,7 @@
           }" class="w-12 h-12 object-cover rounded-md">
             <div class="flex-1 pl-4">
                 <div class="text-sm font-medium">${product.nameTr}</div>
-                <div>€${product.newPrice.toFixed(2)}</div>
+                <div>€${product.newPrice.toFixed(2).replace(".", ",")}</div>
                 <div class="text-xs text-gray-600 mt-1">${product.nameDe}</div>
                 <div class="text-xs mt-1 text-green-600">Available</div>
             </div>

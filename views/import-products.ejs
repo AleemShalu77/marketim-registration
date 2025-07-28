@@ -960,7 +960,6 @@
           document.getElementById("editTurkishName").value;
         updatedProduct.unitPrice =
           document.getElementById("editUnitPrice").value;
-        updatedProduct.saving = document.getElementById("editSaving").value;
         updatedProduct.packageSize =
           document.getElementById("editPackageSize").value;
         updatedProduct.oldPrice =
@@ -973,11 +972,15 @@
         updatedProduct.borderColor =
           document.getElementById("editBorderColor").value;
 
+        // Calculate savings as oldPrice - newPrice
+        const savingsAmount = updatedProduct.oldPrice - updatedProduct.newPrice;
+        updatedProduct.saving =
+          savingsAmount >= 0 ? `€${savingsAmount.toFixed(0)},-` : "0,-";
+
         selectedProducts[boxNumber] = updatedProduct;
         closeEditModal();
         updateGridLayout();
       }
-
       function closeEditModal() {
         document.getElementById("editModal").classList.add("hidden");
         document.getElementById("editForm").reset();

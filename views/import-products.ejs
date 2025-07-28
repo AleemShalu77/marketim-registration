@@ -720,10 +720,10 @@
       function toggleDateEditing() {
         dateProperties.isEditing = !dateProperties.isEditing;
         const dateContainer = document.querySelector(
-          ".header-wrapper > .relative > .flex-shrink-0.text-right > div:first-child"
+          ".header-wrapper .relative .flex-shrink-0.text-right > div:first-child"
         );
         const dateEditContainer = document.querySelector(
-          ".header-wrapper > .relative > .flex-shrink-0.text-right > div:last-child"
+          ".header-wrapper .relative .flex-shrink-0.text-right > div:last-child"
         );
         if (dateContainer && dateEditContainer) {
           dateContainer.classList.toggle("hidden", dateProperties.isEditing);
@@ -731,6 +731,13 @@
             "hidden",
             !dateProperties.isEditing
           );
+          // Fallback to ensure visibility
+          dateContainer.style.display = dateProperties.isEditing
+            ? "none"
+            : "flex";
+          dateEditContainer.style.display = dateProperties.isEditing
+            ? "flex"
+            : "none";
         } else {
           console.error("Date containers not found");
         }
@@ -777,19 +784,21 @@
       function saveDateChanges() {
         dateProperties.isEditing = false;
         const dateContainer = document.querySelector(
-          ".header-wrapper > .relative > .flex-shrink-0.text-right > div:first-child"
+          ".header-wrapper .relative .flex-shrink-0.text-right > div:first-child"
         );
         const dateEditContainer = document.querySelector(
-          ".header-wrapper > .relative > .flex-shrink-0.text-right > div:last-child"
+          ".header-wrapper .relative .flex-shrink-0.text-right > div:last-child"
         );
         if (dateContainer && dateEditContainer) {
           dateContainer.classList.remove("hidden");
           dateEditContainer.classList.add("hidden");
+          // Fallback to ensure visibility
+          dateContainer.style.display = "flex";
+          dateEditContainer.style.display = "none";
         } else {
           console.error("Date containers not found");
         }
       }
-
       function fetchUserProfile(callback) {
         const authToken = localStorage.getItem("authToken");
         if (!authToken) {

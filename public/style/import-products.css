@@ -526,3 +526,11 @@ input[type="color"]::-moz-color-swatch {
     transform: translateX(-100%);
   }
 }
+
+.sidebar.collapsed {
+  width: 64px;
+}
+
+.sidebar.collapsed .sidebarContent {
+  display: none;
+}

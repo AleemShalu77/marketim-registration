@@ -16,9 +16,28 @@
   <body class="min-h-screen flex p-6">
     <div
       class="sidebar fixed left-0 top-0 h-screen w-72 bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6 shadow-lg transform transition-transform duration-300 ease-in-out z-50"
+      id="sidebar"
     >
-      <h2 class="text-2xl font-bold mb-6 text-center">Template Tools</h2>
-      <div class="space-y-4">
+      <div class="flex justify-between items-center mb-6">
+        <!-- <h2 class="text-2xl font-bold text-center">Template Tools</h2> -->
+        <button
+          onclick="toggleSidebar()"
+          class="text-white hover:text-gray-300 text-xl focus:outline-none"
+          id="sidebarToggle"
+          title="Toggle Sidebar"
+        >
+          ☰
+        </button>
+      </div>
+      <div class="space-y-4" id="sidebarContent">
+        <div class="control-group">
+          <a
+            href="/dashboard"
+            class="block w-full p-2 rounded-lg bg-white text-gray-800 text-center font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          >
+            Dashboard
+          </a>
+        </div>
         <div class="control-group">
           <label for="templateSelect" class="block text-sm font-medium mb-2"
             >Select Template:</label
@@ -75,7 +94,6 @@
         </div>
       </div>
     </div>
-
     <div id="templateGridContainer" class="ml-72 w-full">
       <div id="templateGrid"></div>
     </div>
@@ -1219,6 +1237,33 @@
           u8arr[n] = bstr.charCodeAt(n);
         }
         return new Blob([u8arr], { type: mime });
+      }
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const sidebarContent = document.getElementById("sidebarContent");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const templateGridContainer = document.getElementById(
+          "templateGridContainer"
+        );
+
+        const isCollapsed = sidebar.classList.contains("collapsed");
+
+        if (isCollapsed) {
+          sidebar.classList.remove("collapsed", "w-16");
+          sidebar.classList.add("w-72");
+          sidebarContent.classList.remove("hidden");
+          sidebarToggle.textContent = "☰";
+          templateGridContainer.classList.remove("ml-16");
+          templateGridContainer.classList.add("ml-72");
+        } else {
+          sidebar.classList.add("collapsed", "w-16");
+          sidebar.classList.remove("w-72");
+          sidebarContent.classList.add("hidden");
+          sidebarToggle.textContent = "▶";
+          templateGridContainer.classList.remove("ml-72");
+          templateGridContainer.classList.add("ml-16");
+        }
       }
 
       $(document).ready(function () {

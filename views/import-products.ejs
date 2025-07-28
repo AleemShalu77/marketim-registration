@@ -946,10 +946,16 @@
           return;
         }
 
-        const elementsToHide = document.querySelectorAll("h2, .mb-6, button");
+        // Hide sidebar and other elements
+        const sidebar = document.querySelector(".sidebar");
+        const elementsToHide = document.querySelectorAll(
+          "h2, .mb-6, button, .sidebar"
+        );
         elementsToHide.forEach((el) => (el.style.display = "none"));
 
+        // Adjust templateGridContainer to account for sidebar removal
         node.style.width = "794px";
+        node.style.marginLeft = "0"; // Remove margin-left to center content
 
         domtoimage
           .toPng(node, {
@@ -1055,8 +1061,11 @@
                 }).showToast();
               },
               complete: () => {
+                // Restore visibility of hidden elements
                 elementsToHide.forEach((e) => (e.style.display = ""));
+                // Restore original margin-left
                 node.style.width = "";
+                node.style.marginLeft = "";
               },
             });
           })
@@ -1067,11 +1076,13 @@
               duration: 3000,
               backgroundColor: "#ef4444",
             }).showToast();
+            // Restore visibility of hidden elements on error
             elementsToHide.forEach((e) => (e.style.display = ""));
+            // Restore original margin-left
             node.style.width = "";
+            node.style.marginLeft = "";
           });
       }
-
       // Helper function to convert data URL to Blob
       function dataURLtoBlob(dataUrl) {
         const arr = dataUrl.split(",");

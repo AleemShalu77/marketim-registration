@@ -1019,7 +1019,7 @@
         // Calculate savings as oldPrice - newPrice
         const savingsAmount = updatedProduct.oldPrice - updatedProduct.newPrice;
         updatedProduct.saving =
-          savingsAmount > 0 ? `${savingsAmount.toFixed(0)},-` : "0,-";
+          savingsAmount > 0 ? `€ ${savingsAmount.toFixed(2)}` : "0,-";
 
         selectedProducts[boxNumber] = updatedProduct;
         closeEditModal();

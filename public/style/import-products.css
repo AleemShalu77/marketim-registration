@@ -43,13 +43,13 @@
 .turkish-name {
   font-family: serif;
   font-size: 16px;
-  margin-bottom: 5px;
+  /* margin-bottom: 5px; */
 }
 .halal-logo {
   position: absolute;
-  top: 18%;
+  top: 23%;
   left: 2%;
-  width: 4rem;
+  width: 3.5rem;
 }
 .unit-price {
   font-size: 0.8rem;
@@ -75,7 +75,7 @@
   left: 5px;
   bottom: 10px;
   color: red;
-  font-size: 20px;
+  font-size: 14px;
   font-weight: bold;
 }
 .prices {

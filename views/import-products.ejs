@@ -144,6 +144,16 @@
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700"
+              >Handel Class:</label
+            >
+            <input
+              type="text"
+              class="editable-input w-full mt-1 p-2 border rounded"
+              id="editHandelClass"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700"
               >Unit Price:</label
             >
             <input
@@ -460,6 +470,7 @@
                 ? `${proxyUrl}https://api.marketim.app/uploads/${product.thumbnail}`
                 : "./public/images/dummy2.jpg",
               isHalal: product.isHalal,
+              handelClass: product.handelClass || "", // Include handelClass, default to empty string if not present
               bgColor: "#ffffff",
               borderColor: "#e5e7eb",
             }));
@@ -472,6 +483,7 @@
           },
         });
       }
+
       function setTemplateFromQueryParam() {
         const urlParams = new URLSearchParams(window.location.search);
         const templateParam = urlParams.get("template");
@@ -623,6 +635,9 @@
                         <div class="product-names">
                             <div class="german-name">${p.nameDe}</div>
                             <div class="turkish-name">${p.nameTr}</div>
+                            <div class="handel-class text-sm text-gray-600">${
+                              p.handelClass || ""
+                            }</div>
                         </div>
                         ${
                           p.isHalal
@@ -664,7 +679,6 @@
         addProductBoxDragListeners();
         addClickListeners();
       }
-
       function toggleCustomTextEditing() {
         customTextProperties.isEditing = !customTextProperties.isEditing;
         const customTextContainer = document.querySelector(
@@ -949,6 +963,8 @@
         if (product) {
           document.getElementById("editGermanName").value = product.nameDe;
           document.getElementById("editTurkishName").value = product.nameTr;
+          document.getElementById("editHandelClass").value =
+            product.handelClass || "";
           document.getElementById("editUnitPrice").value = product.unitPrice;
           document.getElementById("editSaving").value = product.saving;
           document.getElementById("editPackageSize").value =
@@ -977,16 +993,25 @@
         updatedProduct.nameDe = document.getElementById("editGermanName").value;
         updatedProduct.nameTr =
           document.getElementById("editTurkishName").value;
+        updatedProduct.handelClass =
+          document.getElementById("editHandelClass").value;
         updatedProduct.unitPrice =
           document.getElementById("editUnitPrice").value;
         updatedProduct.packageSize =
           document.getElementById("editPackageSize").value;
+
+        // Parse comma-separated prices
+        const oldPriceInput = document
+          .getElementById("editOldPrice")
+          .value.replace(",", ".");
+        const newPriceInput = document
+          .getElementById("editNewPrice")
+          .value.replace(",", ".");
         updatedProduct.oldPrice =
-          parseFloat(document.getElementById("editOldPrice").value) ||
-          updatedProduct.oldPrice;
+          parseFloat(oldPriceInput) || updatedProduct.oldPrice;
         updatedProduct.newPrice =
-          parseFloat(document.getElementById("editNewPrice").value) ||
-          updatedProduct.newPrice;
+          parseFloat(newPriceInput) || updatedProduct.newPrice;
+
         updatedProduct.bgColor = document.getElementById("editBgColor").value;
         updatedProduct.borderColor =
           document.getElementById("editBorderColor").value;
@@ -994,12 +1019,13 @@
         // Calculate savings as oldPrice - newPrice
         const savingsAmount = updatedProduct.oldPrice - updatedProduct.newPrice;
         updatedProduct.saving =
-          savingsAmount >= 0 ? `${savingsAmount.toFixed(0)},-` : "0,-";
+          savingsAmount > 0 ? `${savingsAmount.toFixed(0)},-` : "0,-";
 
         selectedProducts[boxNumber] = updatedProduct;
         closeEditModal();
         updateGridLayout();
       }
+
       function closeEditModal() {
         document.getElementById("editModal").classList.add("hidden");
         document.getElementById("editForm").reset();
@@ -1097,6 +1123,14 @@
           "h2, .mb-6, button, .sidebar"
         );
         elementsToHide.forEach((el) => (el.style.display = "none"));
+
+        // Hide custom text if it hasn't been edited (still "Custom Text")
+        const customTextElement = document.querySelector(".custom-text-item");
+        let customTextWasHidden = false;
+        if (customTextProperties.text === "Custom Text" && customTextElement) {
+          customTextElement.style.display = "none";
+          customTextWasHidden = true;
+        }
 
         // Adjust templateGridContainer to account for sidebar removal
         node.style.width = `${aWidth * 3.779527559}px`; // Convert mm to px (1 mm = 3.779527559 px)
@@ -1207,6 +1241,10 @@
               complete: () => {
                 // Restore hidden elements
                 elementsToHide.forEach((e) => (e.style.display = ""));
+                // Restore custom text visibility if it was hidden
+                if (customTextWasHidden && customTextElement) {
+                  customTextElement.style.display = "";
+                }
                 // Restore styles
                 node.style.width = "";
                 node.style.marginLeft = "";
@@ -1222,11 +1260,16 @@
             }).showToast();
             // Restore hidden elements on error
             elementsToHide.forEach((e) => (e.style.display = ""));
+            // Restore custom text visibility if it was hidden
+            if (customTextWasHidden && customTextElement) {
+              customTextElement.style.display = "";
+            }
             // Restore styles
             node.style.width = "";
             node.style.marginLeft = "";
           });
       }
+
       // Helper function to convert data URL to Blob
       function dataURLtoBlob(dataUrl) {
         const arr = dataUrl.split(",");

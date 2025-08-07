@@ -270,8 +270,19 @@
       const editingState = {};
 
       // Store date properties at global scope
+      // Store date properties at global scope
       let dateProperties = {
-        text: "Monday, July 28, 2025, 04:26 PM IST",
+        text:
+          new Date().toLocaleString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+            timeZone: "Asia/Kolkata", // For IST timezone
+          }) + " IST",
         color: "#ffffff",
         fontSize: "14",
         isEditing: false,
@@ -660,7 +671,11 @@
                               .replace(".", ",")}</div>
                         </div>
                     </div>
-                    <button onclick="editProduct(${boxNumber}); event.stopPropagation();" class="absolute top-2 right-2 action-btn edit-btn" title="Edit">✎</button>
+                    <div class="absolute top-2 right-2 flex gap-2">
+                        <button onclick="editProduct(${boxNumber}); event.stopPropagation();" class="action-btn edit-btn bg-blue-500 text-white p-1 rounded hover:bg-blue-600" title="Edit">✎</button>
+                        <button onclick="openProductList(${boxNumber}); event.stopPropagation();" class="action-btn change-btn bg-yellow-500 text-white p-1 rounded hover:bg-yellow-600" title="Change Product">↻</button>
+                        <button onclick="removeProduct(${boxNumber}); event.stopPropagation();" class="action-btn remove-btn bg-red-500 text-white p-1 rounded hover:bg-red-600" title="Remove Product">×</button>
+                    </div>
                 `;
             } else {
               box.innerHTML = `
@@ -679,6 +694,7 @@
         addProductBoxDragListeners();
         addClickListeners();
       }
+
       function toggleCustomTextEditing() {
         customTextProperties.isEditing = !customTextProperties.isEditing;
         const customTextContainer = document.querySelector(
@@ -1310,6 +1326,12 @@
           templateGridContainer.classList.remove("ml-72");
           templateGridContainer.classList.add("ml-16");
         }
+      }
+
+      function removeProduct(boxNumber) {
+        delete selectedProducts[boxNumber];
+        delete editingState[boxNumber];
+        updateGridLayout();
       }
 
       $(document).ready(function () {

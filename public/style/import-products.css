@@ -124,6 +124,7 @@
   outline: none;
   background: rgba(255, 255, 255, 0.5);
 }
+
 .action-btn {
   width: 32px;
   height: 32px;
@@ -185,6 +186,7 @@
 .product-box-wrapper.dragging {
   opacity: 0.5;
 }
+
 .grid-item {
   width: 100%;
   margin-bottom: 16px;
